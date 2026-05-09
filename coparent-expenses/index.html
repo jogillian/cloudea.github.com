@@ -147,6 +147,18 @@
       margin-bottom: 10px;
     }
     .list-header h2 { font-size: 0.95rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .export-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .export-btn:hover { background: var(--yellow); color: #2a2a2a; border-color: var(--yellow); }
     .filter-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .filter-btn {
       background: var(--card);
@@ -413,6 +425,7 @@
 
   <div class="list-header">
     <h2>Expenses &amp; Payments</h2>
+    <button class="export-btn" onclick="exportCSV()" title="Download as CSV / open in Google Sheets">&#11123; Export CSV</button>
   </div>
   <div class="filter-row" id="kid-filters"></div>
   <div id="expense-list"></div>
@@ -643,6 +656,61 @@
           <button class="delete-btn" onclick="deleteExpense(${item.id})" title="Remove">&#10005;</button>
         </div>`;
     }).join('');
+  }
+
+  function exportCSV() {
+    if (expenses.length === 0 && payments.length === 0) {
+      showToast('Nothing to export yet');
+      return;
+    }
+    const q = s => `"${String(s).replace(/"/g, '""')}"`;
+    const allRows = [];
+    expenses.forEach(e => {
+      const paidName = e.paidBy === 'me' ? settings.myName : settings.otherName;
+      const owedName = e.paidBy === 'me' ? settings.otherName : settings.myName;
+      allRows.push({ date: e.date, id: e.id, cols: [
+        q('Expense'), q(e.date), q(e.kid), q(e.desc),
+        e.amount.toFixed(2), q(paidName), (e.amount / 2).toFixed(2), q(owedName + ' owes half'), q('')
+      ]});
+    });
+    payments.forEach(p => {
+      const fromName = p.paidBy === 'me' ? settings.myName : settings.otherName;
+      const toName   = p.paidBy === 'me' ? settings.otherName : settings.myName;
+      const desc = `${fromName} paid ${toName}${p.note ? ' (' + p.note + ')' : ''}`;
+      allRows.push({ date: p.date, id: p.id, cols: [
+        q('Payment'), q(p.date), q(''), q(desc),
+        p.amount.toFixed(2), q(fromName), q(''), q('Settlement payment'), q(p.note || '')
+      ]});
+    });
+    allRows.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.id - b.id);
+    let myPaid = 0, otherPaid = 0;
+    expenses.forEach(e => { if (e.paidBy === 'me') myPaid += e.amount; else otherPaid += e.amount; });
+    const total = myPaid + otherPaid;
+    let net = myPaid - total / 2;
+    payments.forEach(p => { if (p.paidBy === 'me') net += p.amount; else net -= p.amount; });
+    const balanceDesc = Math.abs(net) < 0.01 ? 'All settled up'
+      : net > 0 ? `${settings.otherName} owes ${settings.myName} $${net.toFixed(2)}`
+      : `${settings.myName} owes ${settings.otherName} $${Math.abs(net).toFixed(2)}`;
+    const header = ['Type','Date','Kid','Description','Amount','Paid By','Half Owed','Notes','Payment Note'];
+    const lines = [
+      header.map(q).join(','),
+      ...allRows.map(r => r.cols.join(',')),
+      '',
+      q('SUMMARY') + ',,,,,,,',
+      q('Total expenses') + ',,,,,' + total.toFixed(2) + ',,,',
+      q(settings.myName + ' paid') + ',,,,,' + myPaid.toFixed(2) + ',,,',
+      q(settings.otherName + ' paid') + ',,,,,' + otherPaid.toFixed(2) + ',,,',
+      q('Net balance') + ',' + q(balanceDesc) + ',,,,,,,',
+    ];
+    const csv = '﻿' + lines.join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `coparent-expenses-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded!');
   }
 
   function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
