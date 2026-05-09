@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Co-Parent Expense Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1a202c;
+      --muted: #718096;
+      --accent: #4f8ef7;
+      --accent-dark: #3a7ae0;
+      --green: #38a169;
+      --red: #e53e3e;
+      --yellow: #d69e2e;
+      --radius: 10px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+
+    header h1 span {
+      color: var(--text);
+    }
+
+    .settings-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .settings-btn:hover { background: var(--bg); }
+
+    .container { max-width: 680px; margin: 0 auto; padding: 20px 16px; }
+
+    /* ---- Settings panel ---- */
+    #settings-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      display: none;
+      box-shadow: var(--shadow);
+    }
+    #settings-panel h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ---- Balance card ---- */
+    .balance-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .balance-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px; }
+    .balance-amount { font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; }
+    .balance-amount.owe { color: var(--red); }
+    .balance-amount.owed { color: var(--green); }
+    .balance-amount.even { color: var(--muted); }
+    .balance-description { font-size: 0.9rem; color: var(--muted); margin-top: 6px; }
+    .balance-meta { display: flex; justify-content: center; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .balance-meta-item { text-align: center; }
+    .balance-meta-item .val { font-size: 1.05rem; font-weight: 700; }
+    .balance-meta-item .lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
+
+    /* ---- Add expense form ---- */
+    .add-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .add-card h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .form-group { flex: 1 1 140px; display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-group input, .form-group select {
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--bg);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); background: #fff; }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 4px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent-dark); }
+
+    /* ---- Expenses list ---- */
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .list-header h2 { font-size: 0.95rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .filter-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .expense-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .expense-kid-badge {
+      min-width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .expense-body { flex: 1; min-width: 0; }
+    .expense-desc { font-weight: 600; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .expense-meta { font-size: 0.77rem; color: var(--muted); margin-top: 2px; }
+    .expense-meta strong { color: var(--text); }
+
+    .expense-right { text-align: right; flex-shrink: 0; }
+    .expense-amount { font-size: 1.05rem; font-weight: 700; }
+    .expense-owed { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+    .paid-by-me { color: var(--green); }
+    .paid-by-other { color: var(--red); }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--border);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px;
+      border-radius: 4px;
+      line-height: 1;
+      align-self: center;
+      flex-shrink: 0;
+    }
+    .delete-btn:hover { color: var(--red); background: #fff0f0; }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+    /* ---- Settings fields ---- */
+    .settings-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .settings-grid .form-group { flex: 1 1 160px; }
+    .btn-save {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-save:hover { opacity: 0.9; }
+    .btn-danger {
+      background: none;
+      border: 1px solid var(--red);
+      color: var(--red);
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .btn-danger:hover { background: #fff0f0; }
+    .settings-actions { margin-top: 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a202c;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: transform 0.25s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .balance-amount { font-size: 2rem; }
+      .form-group { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>Co-Parent</span> Expenses</h1>
+  <button class="settings-btn" onclick="toggleSettings()">⚙ Settings</button>
+</header>
+
+<div class="container">
+
+  <!-- Settings Panel -->
+  <div id="settings-panel">
+    <h2>Setup</h2>
+    <div class="settings-grid">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input id="s-my-name" type="text" placeholder="e.g. Mom" />
+      </div>
+      <div class="form-group">
+        <label>Co-Parent Name</label>
+        <input id="s-other-name" type="text" placeholder="e.g. Dad" />
+      </div>
+      <div class="form-group" style="flex: 1 1 100%;">
+        <label>Kids (comma-separated)</label>
+        <input id="s-kids" type="text" placeholder="e.g. Emma, Jack, Lily" />
+      </div>
+    </div>
+    <div class="settings-actions">
+      <button class="btn-save" onclick="saveSettings()">Save Settings</button>
+      <button class="btn-danger" onclick="clearAllData()">Clear All Data</button>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-label">Current Balance</div>
+    <div id="balance-amount" class="balance-amount even">$0.00</div>
+    <div id="balance-description" class="balance-description">All settled up!</div>
+    <div class="balance-meta">
+      <div class="balance-meta-item">
+        <div class="val" id="meta-my-total">$0.00</div>
+        <div class="lbl" id="meta-my-label">You paid</div>
+      </div>
+      <div class="balance-meta-item">
+        <div class="val" id="meta-other-total">$0.00</div>
+        <div class="lbl" id="meta-other-label">They paid</div>
+      </div>
+      <div class="balance-meta-item">
+        <div class="val" id="meta-total">$0.00</div>
+        <div class="lbl">Total expenses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Expense -->
+  <div class="add-card">
+    <h2>Add Expense</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Kid</label>
+        <select id="f-kid"></select>
+      </div>
+      <div class="form-group">
+        <label>Paid By</label>
+        <select id="f-paid-by"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex: 2 1 200px;">
+        <label>Description</label>
+        <input id="f-desc" type="text" placeholder="e.g. Soccer cleats" />
+      </div>
+      <div class="form-group" style="flex: 1 1 100px;">
+        <label>Amount ($)</label>
+        <input id="f-amount" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input id="f-date" type="date" />
+      </div>
+    </div>
+    <button class="btn-primary" onclick="addExpense()">+ Add Expense</button>
+  </div>
+
+  <!-- Expenses List -->
+  <div class="list-header">
+    <h2>Expenses</h2>
+  </div>
+  <div class="filter-row" id="kid-filters"></div>
+  <div id="expense-list"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---- State ----
+  let settings = { myName: 'Me', otherName: 'Co-Parent', kids: ['Child'] };
+  let expenses = [];
+  let activeFilter = 'all';
+
+  // ---- Init ----
+  function init() {
+    const savedSettings = localStorage.getItem('cp_settings');
+    const savedExpenses = localStorage.getItem('cp_expenses');
+    if (savedSettings) settings = JSON.parse(savedSettings);
+    if (savedExpenses) expenses = JSON.parse(savedExpenses);
+    renderAll();
+  }
+
+  function save() {
+    localStorage.setItem('cp_settings', JSON.stringify(settings));
+    localStorage.setItem('cp_expenses', JSON.stringify(expenses));
+  }
+
+  // ---- Settings ----
+  function toggleSettings() {
+    const panel = document.getElementById('settings-panel');
+    const open = panel.style.display === 'block';
+    if (!open) {
+      document.getElementById('s-my-name').value = settings.myName;
+      document.getElementById('s-other-name').value = settings.otherName;
+      document.getElementById('s-kids').value = settings.kids.join(', ');
+    }
+    panel.style.display = open ? 'none' : 'block';
+  }
+
+  function saveSettings() {
+    const myName = document.getElementById('s-my-name').value.trim() || 'Me';
+    const otherName = document.getElementById('s-other-name').value.trim() || 'Co-Parent';
+    const kidsRaw = document.getElementById('s-kids').value.trim();
+    const kids = kidsRaw ? kidsRaw.split(',').map(k => k.trim()).filter(Boolean) : ['Child'];
+    settings = { myName, otherName, kids };
+    save();
+    renderAll();
+    document.getElementById('settings-panel').style.display = 'none';
+    showToast('Settings saved');
+  }
+
+  function clearAllData() {
+    if (!confirm('Delete all expenses? This cannot be undone.')) return;
+    expenses = [];
+    save();
+    renderAll();
+    showToast('All data cleared');
+  }
+
+  // ---- Add Expense ----
+  function addExpense() {
+    const kid = document.getElementById('f-kid').value;
+    const paidBy = document.getElementById('f-paid-by').value;
+    const desc = document.getElementById('f-desc').value.trim();
+    const amount = parseFloat(document.getElementById('f-amount').value);
+    const date = document.getElementById('f-date').value;
+
+    if (!desc) { showToast('Please enter a description'); return; }
+    if (!amount || amount <= 0) { showToast('Please enter a valid amount'); return; }
+    if (!date) { showToast('Please pick a date'); return; }
+
+    expenses.unshift({ id: Date.now(), kid, paidBy, desc, amount, date });
+    save();
+
+    document.getElementById('f-desc').value = '';
+    document.getElementById('f-amount').value = '';
+    renderAll();
+    showToast('Expense added');
+  }
+
+  function deleteExpense(id) {
+    if (!confirm('Remove this expense?')) return;
+    expenses = expenses.filter(e => e.id !== id);
+    save();
+    renderAll();
+    showToast('Expense removed');
+  }
+
+  // ---- Render ----
+  function renderAll() {
+    renderDropdowns();
+    renderFilters();
+    renderBalance();
+    renderList();
+  }
+
+  function renderDropdowns() {
+    const kidSel = document.getElementById('f-kid');
+    const current = kidSel.value;
+    kidSel.innerHTML = settings.kids.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
+    if (current && settings.kids.includes(current)) kidSel.value = current;
+
+    const paidSel = document.getElementById('f-paid-by');
+    const currentPaid = paidSel.value;
+    paidSel.innerHTML = `<option value="me">${esc(settings.myName)}</option><option value="other">${esc(settings.otherName)}</option>`;
+    if (currentPaid) paidSel.value = currentPaid;
+  }
+
+  function renderFilters() {
+    const container = document.getElementById('kid-filters');
+    const kids = [...new Set(expenses.map(e => e.kid))];
+    let html = `<button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">All</button>`;
+    kids.forEach(k => {
+      html += `<button class="filter-btn ${activeFilter === k ? 'active' : ''}" onclick="setFilter('${esc(k)}')">${esc(k)}</button>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function setFilter(val) {
+    activeFilter = val;
+    renderFilters();
+    renderList();
+  }
+
+  function renderBalance() {
+    const filtered = activeFilter === 'all' ? expenses : expenses.filter(e => e.kid === activeFilter);
+
+    let myPaid = 0, otherPaid = 0;
+    filtered.forEach(e => {
+      if (e.paidBy === 'me') myPaid += e.amount;
+      else otherPaid += e.amount;
+    });
+
+    const total = myPaid + otherPaid;
+    // Each owes 50% of total
+    const eachOwes = total / 2;
+    // Net: positive = other owes me, negative = I owe other
+    const net = myPaid - eachOwes;
+
+    const amountEl = document.getElementById('balance-amount');
+    const descEl = document.getElementById('balance-description');
+
+    amountEl.className = 'balance-amount';
+    if (Math.abs(net) < 0.01) {
+      amountEl.textContent = '$0.00';
+      amountEl.classList.add('even');
+      descEl.textContent = 'All settled up! 🎉';
+    } else if (net > 0) {
+      amountEl.textContent = fmt(net);
+      amountEl.classList.add('owed');
+      descEl.textContent = `${esc(settings.otherName)} owes you ${fmt(net)}`;
+    } else {
+      amountEl.textContent = fmt(Math.abs(net));
+      amountEl.classList.add('owe');
+      descEl.textContent = `You owe ${esc(settings.otherName)} ${fmt(Math.abs(net))}`;
+    }
+
+    document.getElementById('meta-my-total').textContent = fmt(myPaid);
+    document.getElementById('meta-my-label').textContent = `${settings.myName} paid`;
+    document.getElementById('meta-other-total').textContent = fmt(otherPaid);
+    document.getElementById('meta-other-label').textContent = `${settings.otherName} paid`;
+    document.getElementById('meta-total').textContent = fmt(total);
+  }
+
+  function renderList() {
+    const container = document.getElementById('expense-list');
+    const filtered = activeFilter === 'all' ? expenses : expenses.filter(e => e.kid === activeFilter);
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">📋</div>No expenses yet. Add one above!</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(e => {
+      const byMe = e.paidBy === 'me';
+      const paidName = byMe ? settings.myName : settings.otherName;
+      const owedName = byMe ? settings.otherName : settings.myName;
+      const colorClass = byMe ? 'paid-by-me' : 'paid-by-other';
+      const initials = kidInitials(e.kid);
+      const half = fmt(e.amount / 2);
+      const dateStr = formatDate(e.date);
+
+      return `
+        <div class="expense-item">
+          <div class="expense-kid-badge" style="background:${kidColor(e.kid)}">${initials}</div>
+          <div class="expense-body">
+            <div class="expense-desc">${esc(e.desc)}</div>
+            <div class="expense-meta">
+              <strong>${esc(e.kid)}</strong> &middot; ${dateStr} &middot;
+              <span class="${colorClass}">Paid by ${esc(paidName)}</span>
+            </div>
+          </div>
+          <div class="expense-right">
+            <div class="expense-amount">${fmt(e.amount)}</div>
+            <div class="expense-owed">${esc(owedName)} owes ${half}</div>
+          </div>
+          <button class="delete-btn" onclick="deleteExpense(${e.id})" title="Remove">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- Helpers ----
+  function fmt(n) {
+    return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function kidInitials(kid) {
+    return kid.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2);
+  }
+
+  const KID_COLORS = ['#4f8ef7','#38a169','#d69e2e','#9f7aea','#e53e3e','#319795'];
+  const kidColorMap = {};
+  function kidColor(kid) {
+    if (!kidColorMap[kid]) {
+      const idx = Object.keys(kidColorMap).length % KID_COLORS.length;
+      kidColorMap[kid] = KID_COLORS[idx];
+    }
+    return kidColorMap[kid];
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Set today's date as default
+  document.getElementById('f-date').valueAsDate = new Date();
+
+  init();
+</script>
+</body>
+</html>
