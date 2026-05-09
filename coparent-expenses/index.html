@@ -67,7 +67,6 @@
 
     .container { max-width: 680px; margin: 0 auto; padding: 20px 16px; }
 
-    /* ---- Settings panel ---- */
     #settings-panel {
       background: var(--card);
       border: 1px solid var(--border);
@@ -79,7 +78,6 @@
     }
     #settings-panel h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* ---- Balance card ---- */
     .balance-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -100,7 +98,6 @@
     .balance-meta-item .val { font-size: 1.05rem; font-weight: 700; }
     .balance-meta-item .lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
 
-    /* ---- Add expense form ---- */
     .add-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -142,7 +139,6 @@
     }
     .btn-primary:hover { background: var(--accent-dark); }
 
-    /* ---- Expenses list ---- */
     .list-header {
       display: flex;
       align-items: center;
@@ -203,6 +199,35 @@
     .paid-by-me { color: var(--green); }
     .paid-by-other { color: var(--red); }
 
+    .payment-item {
+      background: #f0faf4;
+      border-radius: var(--radius);
+      border: 1px solid #c6e6d4;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.2s ease;
+    }
+    .payment-badge {
+      min-width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .payment-body { flex: 1; min-width: 0; }
+    .payment-desc { font-weight: 600; font-size: 0.92rem; color: var(--green); }
+    .payment-meta { font-size: 0.77rem; color: var(--muted); margin-top: 2px; }
+    .payment-amount { font-size: 1.05rem; font-weight: 700; color: var(--green); text-align: right; flex-shrink: 0; }
+
     .delete-btn {
       background: none;
       border: none;
@@ -225,7 +250,6 @@
     }
     .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
 
-    /* ---- Settings fields ---- */
     .settings-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
     .settings-grid .form-group { flex: 1 1 160px; }
     .btn-save {
@@ -285,7 +309,6 @@
 
 <div class="container">
 
-  <!-- Settings Panel -->
   <div id="settings-panel">
     <h2>Setup</h2>
     <div class="settings-grid">
@@ -308,7 +331,6 @@
     </div>
   </div>
 
-  <!-- Balance Card -->
   <div class="balance-card">
     <div class="balance-label">Current Balance</div>
     <div id="balance-amount" class="balance-amount even">$0.00</div>
@@ -329,7 +351,6 @@
     </div>
   </div>
 
-  <!-- Add Expense -->
   <div class="add-card">
     <h2>Add Expense</h2>
     <div class="form-row">
@@ -361,9 +382,36 @@
     <button class="btn-primary" onclick="addExpense()">+ Add Expense</button>
   </div>
 
-  <!-- Expenses List -->
+  <div class="add-card" style="border-color: #c6e6d4;">
+    <h2 style="color: var(--green);">Record a Payment</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Who Paid?</label>
+        <select id="p-paid-by">
+          <option value="me">I paid them</option>
+          <option value="other">They paid me</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount ($)</label>
+        <input id="p-amount" type="number" min="0" step="0.01" placeholder="0.00" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input id="p-date" type="date" />
+      </div>
+      <div class="form-group">
+        <label>Note (optional)</label>
+        <input id="p-note" type="text" placeholder="e.g. e-transfer" />
+      </div>
+    </div>
+    <button class="btn-primary" style="background: var(--green);" onclick="addPayment()">&#10003; Record Payment</button>
+  </div>
+
   <div class="list-header">
-    <h2>Expenses</h2>
+    <h2>Expenses &amp; Payments</h2>
   </div>
   <div class="filter-row" id="kid-filters"></div>
   <div id="expense-list"></div>
@@ -375,19 +423,23 @@
 <script>
   let settings = { myName: 'Me', otherName: 'Co-Parent', kids: ['Child'] };
   let expenses = [];
+  let payments = [];
   let activeFilter = 'all';
 
   function init() {
     const savedSettings = localStorage.getItem('cp_settings');
     const savedExpenses = localStorage.getItem('cp_expenses');
+    const savedPayments = localStorage.getItem('cp_payments');
     if (savedSettings) settings = JSON.parse(savedSettings);
     if (savedExpenses) expenses = JSON.parse(savedExpenses);
+    if (savedPayments) payments = JSON.parse(savedPayments);
     renderAll();
   }
 
   function save() {
     localStorage.setItem('cp_settings', JSON.stringify(settings));
     localStorage.setItem('cp_expenses', JSON.stringify(expenses));
+    localStorage.setItem('cp_payments', JSON.stringify(payments));
   }
 
   function toggleSettings() {
@@ -414,11 +466,35 @@
   }
 
   function clearAllData() {
-    if (!confirm('Delete all expenses? This cannot be undone.')) return;
+    if (!confirm('Delete all expenses and payments? This cannot be undone.')) return;
     expenses = [];
+    payments = [];
     save();
     renderAll();
     showToast('All data cleared');
+  }
+
+  function addPayment() {
+    const paidBy = document.getElementById('p-paid-by').value;
+    const amount = parseFloat(document.getElementById('p-amount').value);
+    const date = document.getElementById('p-date').value;
+    const note = document.getElementById('p-note').value.trim();
+    if (!amount || amount <= 0) { showToast('Please enter a valid amount'); return; }
+    if (!date) { showToast('Please pick a date'); return; }
+    payments.unshift({ id: Date.now(), paidBy, amount, date, note });
+    save();
+    document.getElementById('p-amount').value = '';
+    document.getElementById('p-note').value = '';
+    renderAll();
+    showToast('Payment recorded');
+  }
+
+  function deletePayment(id) {
+    if (!confirm('Remove this payment?')) return;
+    payments = payments.filter(p => p.id !== id);
+    save();
+    renderAll();
+    showToast('Payment removed');
   }
 
   function addExpense() {
@@ -427,11 +503,9 @@
     const desc = document.getElementById('f-desc').value.trim();
     const amount = parseFloat(document.getElementById('f-amount').value);
     const date = document.getElementById('f-date').value;
-
     if (!desc) { showToast('Please enter a description'); return; }
     if (!amount || amount <= 0) { showToast('Please enter a valid amount'); return; }
     if (!date) { showToast('Please pick a date'); return; }
-
     expenses.unshift({ id: Date.now(), kid, paidBy, desc, amount, date });
     save();
     document.getElementById('f-desc').value = '';
@@ -460,7 +534,6 @@
     const current = kidSel.value;
     kidSel.innerHTML = settings.kids.map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('');
     if (current && settings.kids.includes(current)) kidSel.value = current;
-
     const paidSel = document.getElementById('f-paid-by');
     const currentPaid = paidSel.value;
     paidSel.innerHTML = `<option value="me">${esc(settings.myName)}</option><option value="other">${esc(settings.otherName)}</option>`;
@@ -491,7 +564,13 @@
       else otherPaid += e.amount;
     });
     const total = myPaid + otherPaid;
-    const net = myPaid - total / 2;
+    let net = myPaid - total / 2;
+    if (activeFilter === 'all') {
+      payments.forEach(p => {
+        if (p.paidBy === 'me') net += p.amount;
+        else net -= p.amount;
+      });
+    }
     const amountEl = document.getElementById('balance-amount');
     const descEl = document.getElementById('balance-description');
     amountEl.className = 'balance-amount';
@@ -517,31 +596,50 @@
 
   function renderList() {
     const container = document.getElementById('expense-list');
-    const filtered = activeFilter === 'all' ? expenses : expenses.filter(e => e.kid === activeFilter);
-    if (filtered.length === 0) {
+    const filteredExpenses = activeFilter === 'all' ? expenses : expenses.filter(e => e.kid === activeFilter);
+    const items = filteredExpenses.map(e => ({ ...e, _type: 'expense' }));
+    if (activeFilter === 'all') {
+      payments.forEach(p => items.push({ ...p, _type: 'payment' }));
+    }
+    items.sort((a, b) => b.id - a.id);
+    if (items.length === 0) {
       container.innerHTML = `<div class="empty-state"><div class="icon">&#128203;</div>No expenses yet. Add one above!</div>`;
       return;
     }
-    container.innerHTML = filtered.map(e => {
-      const byMe = e.paidBy === 'me';
+    container.innerHTML = items.map(item => {
+      if (item._type === 'payment') {
+        const byMe = item.paidBy === 'me';
+        const label = byMe ? `You paid ${settings.otherName}` : `${settings.otherName} paid you`;
+        const note = item.note ? ` &middot; ${esc(item.note)}` : '';
+        return `
+          <div class="payment-item">
+            <div class="payment-badge">&#10003;</div>
+            <div class="payment-body">
+              <div class="payment-desc">${label}</div>
+              <div class="payment-meta">${formatDate(item.date)}${note}</div>
+            </div>
+            <div class="payment-amount">${fmt(item.amount)}</div>
+            <button class="delete-btn" onclick="deletePayment(${item.id})" title="Remove">&#10005;</button>
+          </div>`;
+      }
+      const byMe = item.paidBy === 'me';
       const paidName = byMe ? settings.myName : settings.otherName;
       const owedName = byMe ? settings.otherName : settings.myName;
       const colorClass = byMe ? 'paid-by-me' : 'paid-by-other';
-      const initials = kidInitials(e.kid);
-      const half = fmt(e.amount / 2);
-      const dateStr = formatDate(e.date);
+      const initials = kidInitials(item.kid);
+      const half = fmt(item.amount / 2);
       return `
         <div class="expense-item">
-          <div class="expense-kid-badge" style="background:${kidColor(e.kid)}">${initials}</div>
+          <div class="expense-kid-badge" style="background:${kidColor(item.kid)}">${initials}</div>
           <div class="expense-body">
-            <div class="expense-desc">${esc(e.desc)}</div>
-            <div class="expense-meta"><strong>${esc(e.kid)}</strong> &middot; ${dateStr} &middot; <span class="${colorClass}">Paid by ${esc(paidName)}</span></div>
+            <div class="expense-desc">${esc(item.desc)}</div>
+            <div class="expense-meta"><strong>${esc(item.kid)}</strong> &middot; ${formatDate(item.date)} &middot; <span class="${colorClass}">Paid by ${esc(paidName)}</span></div>
           </div>
           <div class="expense-right">
-            <div class="expense-amount">${fmt(e.amount)}</div>
+            <div class="expense-amount">${fmt(item.amount)}</div>
             <div class="expense-owed">${esc(owedName)} owes ${half}</div>
           </div>
-          <button class="delete-btn" onclick="deleteExpense(${e.id})" title="Remove">&#10005;</button>
+          <button class="delete-btn" onclick="deleteExpense(${item.id})" title="Remove">&#10005;</button>
         </div>`;
     }).join('');
   }
@@ -575,6 +673,7 @@
   }
 
   document.getElementById('f-date').valueAsDate = new Date();
+  document.getElementById('p-date').valueAsDate = new Date();
   init();
 </script>
 </body>
