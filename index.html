@@ -52,6 +52,65 @@
     }
     .btn-google:hover { border-color: var(--mint); box-shadow: 0 4px 16px rgba(92,183,164,0.25); }
 
+    /* HOUSEHOLD SCREEN */
+    #household-screen {
+      min-height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--lemon) 0%, #d4ede8 100%);
+    }
+    .hh-card {
+      background: var(--white);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    .hh-title { font-size: 24px; font-weight: 900; color: var(--mint); margin-bottom: 8px; }
+    .hh-sub { font-size: 14px; color: var(--mid); margin-bottom: 28px; }
+    .hh-choice { display: flex; flex-direction: column; gap: 12px; }
+    .hh-btn {
+      padding: 16px 20px; border-radius: 12px; border: none; cursor: pointer;
+      font-size: 15px; font-weight: 700; font-family: inherit; transition: opacity 0.15s, transform 0.1s;
+    }
+    .hh-btn:active { transform: scale(0.97); }
+    .hh-btn-new { background: var(--mint); color: white; }
+    .hh-btn-join { background: var(--lemon); color: var(--dark); border: 2px solid var(--citrus); }
+    .hh-divider { font-size: 13px; color: var(--mid); margin: 4px 0; }
+    .hh-code-display {
+      background: var(--lemon); border: 2px dashed var(--citrus); border-radius: 12px;
+      padding: 20px; margin: 16px 0;
+    }
+    .hh-code-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--mid); margin-bottom: 8px; }
+    .hh-code-value { font-size: 36px; font-weight: 900; letter-spacing: 6px; color: var(--mint); font-family: monospace; }
+    .hh-code-hint { font-size: 13px; color: var(--mid); margin-top: 8px; }
+    .join-input {
+      width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 10px;
+      font-size: 22px; font-weight: 900; letter-spacing: 5px; text-align: center;
+      font-family: monospace; text-transform: uppercase; margin-bottom: 12px; color: var(--dark);
+    }
+    .join-input:focus { outline: none; border-color: var(--mint); }
+
+    /* INVITE CARD */
+    .invite-card {
+      background: linear-gradient(135deg, #e8f7f3, #fdf6d8);
+      border: 2px solid var(--soft-mint);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .invite-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--mid); margin-bottom: 4px; }
+    .invite-code { font-size: 26px; font-weight: 900; letter-spacing: 5px; color: var(--mint); font-family: monospace; }
+    .invite-hint { font-size: 12px; color: var(--mid); margin-top: 3px; }
+
     /* HEADER */
     header {
       background: var(--mint);
@@ -260,6 +319,42 @@
   </div>
 </div>
 
+<!-- HOUSEHOLD SETUP -->
+<div id="household-screen">
+  <div class="hh-card" id="hh-choice-panel">
+    <div class="hh-title">Welcome to GG Money 💰</div>
+    <p class="hh-sub">Set up your family household to get started</p>
+    <div class="hh-choice">
+      <button class="hh-btn hh-btn-new" id="btn-create-household">🏠 Create a new household</button>
+      <div class="hh-divider">— or —</div>
+      <button class="hh-btn hh-btn-join" id="btn-show-join">🔗 Join with an invite code</button>
+    </div>
+  </div>
+
+  <div class="hh-card" id="hh-join-panel" style="display:none">
+    <div class="hh-title">Join a Household</div>
+    <p class="hh-sub">Enter the 6-letter code from your co-parent</p>
+    <input class="join-input" type="text" id="join-code-input" maxlength="6" placeholder="ABC123" autocomplete="off">
+    <button class="hh-btn hh-btn-new" id="btn-join-household" style="width:100%">Join Household</button>
+    <div style="margin-top:12px">
+      <button class="btn btn-secondary" id="btn-back-to-choice" style="width:100%">← Back</button>
+    </div>
+    <div id="join-error" style="color:#c00;font-size:13px;margin-top:10px;display:none"></div>
+  </div>
+
+  <div class="hh-card" id="hh-created-panel" style="display:none">
+    <div class="hh-title">Household Created! 🎉</div>
+    <p class="hh-sub">Share this code with your co-parent so they can join</p>
+    <div class="hh-code-display">
+      <div class="hh-code-label">Your invite code</div>
+      <div class="hh-code-value" id="new-invite-code">------</div>
+      <div class="hh-code-hint">They enter this code when they first sign in</div>
+    </div>
+    <button class="hh-btn hh-btn-new" id="btn-copy-new-code" style="width:100%;margin-bottom:12px">📋 Copy Code</button>
+    <button class="hh-btn hh-btn-join" id="btn-enter-app" style="width:100%">Open Dashboard →</button>
+  </div>
+</div>
+
 <!-- MAIN APP -->
 <div id="main-app" style="display:none">
   <header>
@@ -289,6 +384,15 @@
 
     <!-- DASHBOARD -->
     <div id="tab-dashboard" class="tab-content active">
+      <div id="invite-card" style="display:none" class="invite-card">
+        <div>
+          <div class="invite-label">Your household code</div>
+          <div class="invite-code" id="dash-invite-code">------</div>
+          <div class="invite-hint">Share with your co-parent to give them access</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btn-copy-invite">📋 Copy</button>
+      </div>
+
       <div class="dash-grid">
         <div class="stat-card custody-stat">
           <div class="stat-label">Kids with</div>
@@ -659,6 +763,9 @@ const db = getFirestore(app);
 
 // ── State ────────────────────────────────────────────────────────────────────────────
 let uid = null;
+let householdId = null;
+let inviteCode = null;
+let isOwner = false;
 let expenses = [], payments = [], dates = [], notes = [], todos = [];
 let travels = [], medicals = [], schools = [];
 let activeFilter = 'all';
@@ -667,13 +774,12 @@ let budgetData = null;
 let kidsNames = { k1: 'Kid 1', k2: 'Kid 2' };
 const unsubs = [];
 
-// Custody: May 11 2026 Monday = Tim's week
 const CUSTODY_REF = new Date('2026-05-11T00:00:00');
 const MY = 'Joanna', OTHER = 'Tim';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────────────
-const uc = (col) => collection(db, 'users', uid, col);
-const ud = (col, id) => doc(db, 'users', uid, col, id);
+// ── Helpers ───────────────────────────────────────────────────────────────────────────
+const hc = (col) => collection(db, 'households', householdId, col);
+const hd = (col, id) => doc(db, 'households', householdId, col, id);
 
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -725,37 +831,163 @@ function catBg(cat) {
   return '#eef8f4';
 }
 
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function show(id, flex) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = flex ? 'flex' : 'block';
+}
+function hide(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
 // ── Auth ────────────────────────────────────────────────────────────────────────────
 document.getElementById('btn-signin').onclick = async () => {
   try { await signInWithPopup(auth, new GoogleAuthProvider()); }
   catch(e) { alert('Sign-in failed: ' + e.message); }
 };
-document.getElementById('btn-signout').onclick = () => { if (confirm('Sign out?')) signOut(auth); };
+document.getElementById('btn-signout').onclick = () => {
+  if (confirm('Sign out?')) signOut(auth);
+};
 
 onAuthStateChanged(auth, async user => {
   if (user) {
     uid = user.uid;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    const p = document.getElementById('user-photo');
-    if (user.photoURL) { p.src = user.photoURL; p.style.display = 'block'; }
-    document.getElementById('user-name').textContent = (user.displayName || '').split(' ')[0];
-    await loadKidsNames();
-    startListeners();
-    renderCalendar();
-    updateCustodyDetail();
+    hide('login-screen');
+    const profileSnap = await getDoc(doc(db, 'userProfiles', uid));
+    if (profileSnap.exists()) {
+      const profile = profileSnap.data();
+      householdId = profile.householdId;
+      inviteCode = profile.inviteCode || null;
+      isOwner = profile.role === 'owner';
+      launchApp(user);
+    } else {
+      show('household-screen', true);
+    }
   } else {
-    uid = null;
+    uid = null; householdId = null; inviteCode = null; isOwner = false;
     unsubs.forEach(u => u && u()); unsubs.length = 0;
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
+    show('login-screen', true);
+    hide('household-screen');
+    hide('main-app');
   }
 });
 
-// ── Kids Names ───────────────────────────────────────────────────────────────────
+// ── Household Setup ───────────────────────────────────────────────────────────────
+document.getElementById('btn-create-household').onclick = async () => {
+  const code = generateCode();
+  const newHouseholdId = 'hh_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  await setDoc(doc(db, 'userProfiles', uid), {
+    householdId: newHouseholdId,
+    inviteCode: code,
+    role: 'owner',
+    createdAt: serverTimestamp()
+  });
+  await setDoc(doc(db, 'householdCodes', code), {
+    householdId: newHouseholdId,
+    createdBy: uid,
+    createdAt: serverTimestamp()
+  });
+  householdId = newHouseholdId;
+  inviteCode = code;
+  isOwner = true;
+  document.getElementById('new-invite-code').textContent = code;
+  hide('hh-choice-panel');
+  show('hh-created-panel');
+};
+
+document.getElementById('btn-show-join').onclick = () => {
+  hide('hh-choice-panel');
+  show('hh-join-panel');
+};
+
+document.getElementById('btn-back-to-choice').onclick = () => {
+  hide('hh-join-panel');
+  show('hh-choice-panel');
+  hide('join-error');
+  document.getElementById('join-code-input').value = '';
+};
+
+document.getElementById('btn-join-household').onclick = async () => {
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  if (code.length !== 6) {
+    document.getElementById('join-error').textContent = 'Please enter a 6-character code.';
+    show('join-error');
+    return;
+  }
+  const codeSnap = await getDoc(doc(db, 'householdCodes', code));
+  if (!codeSnap.exists()) {
+    document.getElementById('join-error').textContent = 'Code not found. Check with your co-parent and try again.';
+    show('join-error');
+    return;
+  }
+  const hhId = codeSnap.data().householdId;
+  await setDoc(doc(db, 'userProfiles', uid), {
+    householdId: hhId,
+    inviteCode: null,
+    role: 'member',
+    joinedAt: serverTimestamp()
+  });
+  householdId = hhId;
+  inviteCode = null;
+  isOwner = false;
+  hide('household-screen');
+  const user = auth.currentUser;
+  launchApp(user);
+};
+
+document.getElementById('btn-copy-new-code').onclick = () => {
+  navigator.clipboard.writeText(inviteCode).then(() => {
+    document.getElementById('btn-copy-new-code').textContent = '✅ Copied!';
+    setTimeout(() => { document.getElementById('btn-copy-new-code').textContent = '📋 Copy Code'; }, 2000);
+  });
+};
+
+document.getElementById('btn-enter-app').onclick = () => {
+  hide('household-screen');
+  const user = auth.currentUser;
+  launchApp(user);
+};
+
+// ── Launch App ───────────────────────────────────────────────────────────────────────────
+function launchApp(user) {
+  hide('household-screen');
+  show('main-app');
+  const p = document.getElementById('user-photo');
+  if (user.photoURL) { p.src = user.photoURL; p.style.display = 'block'; }
+  document.getElementById('user-name').textContent = (user.displayName || '').split(' ')[0];
+
+  if (isOwner && inviteCode) {
+    document.getElementById('dash-invite-code').textContent = inviteCode;
+    show('invite-card');
+  }
+
+  loadKidsNames().then(() => {
+    startListeners();
+    renderCalendar();
+    updateCustodyDetail();
+  });
+}
+
+// ── Copy invite from dashboard ───────────────────────────────────────────────────────────────
+document.getElementById('btn-copy-invite').onclick = () => {
+  if (!inviteCode) return;
+  navigator.clipboard.writeText(inviteCode).then(() => {
+    document.getElementById('btn-copy-invite').textContent = '✅ Copied!';
+    setTimeout(() => { document.getElementById('btn-copy-invite').textContent = '📋 Copy'; }, 2000);
+  });
+};
+
+// ── Kids Names ───────────────────────────────────────────────────────────────────────────
 async function loadKidsNames() {
   try {
-    const snap = await getDoc(ud('kidsInfo', 'config'));
+    const snap = await getDoc(hd('kidsInfo', 'config'));
     if (snap.exists()) {
       const d = snap.data();
       if (d.kid1?.name) kidsNames.k1 = d.kid1.name;
@@ -770,44 +1002,44 @@ function updateKidsDropdowns() {
   ['ef-kid2-opt','mf-kid2-opt','sf-kid2-opt'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = kidsNames.k2; });
 }
 
-// ── Listeners ────────────────────────────────────────────────────────────────────
+// ── Listeners ────────────────────────────────────────────────────────────────────────────
 function startListeners() {
-  unsubs.push(onSnapshot(query(uc('expenses'), orderBy('date','desc')), s => {
+  unsubs.push(onSnapshot(query(hc('expenses'), orderBy('date','desc')), s => {
     expenses = s.docs.map(d => ({id:d.id,...d.data()}));
     renderExpenses(); updateDash();
   }));
-  unsubs.push(onSnapshot(query(uc('payments'), orderBy('date','desc')), s => {
+  unsubs.push(onSnapshot(query(hc('payments'), orderBy('date','desc')), s => {
     payments = s.docs.map(d => ({id:d.id,...d.data()}));
     renderExpenses(); updateDash();
   }));
-  unsubs.push(onSnapshot(query(uc('importantDates'), orderBy('date','asc')), s => {
+  unsubs.push(onSnapshot(query(hc('importantDates'), orderBy('date','asc')), s => {
     dates = s.docs.map(d => ({id:d.id,...d.data()}));
     renderDates(); updateDash();
   }));
-  unsubs.push(onSnapshot(query(uc('notes'), orderBy('createdAt','desc')), s => {
+  unsubs.push(onSnapshot(query(hc('notes'), orderBy('createdAt','desc')), s => {
     notes = s.docs.map(d => ({id:d.id,...d.data()}));
     renderNotes();
   }));
-  unsubs.push(onSnapshot(query(uc('todos'), orderBy('createdAt','asc')), s => {
+  unsubs.push(onSnapshot(query(hc('todos'), orderBy('createdAt','asc')), s => {
     todos = s.docs.map(d => ({id:d.id,...d.data()}));
     renderTodos();
   }));
-  unsubs.push(onSnapshot(query(uc('travels'), orderBy('startDate','asc')), s => {
+  unsubs.push(onSnapshot(query(hc('travels'), orderBy('startDate','asc')), s => {
     travels = s.docs.map(d => ({id:d.id,...d.data()}));
     renderTravel();
   }));
-  unsubs.push(onSnapshot(query(uc('medicals'), orderBy('date','desc')), s => {
+  unsubs.push(onSnapshot(query(hc('medicals'), orderBy('date','desc')), s => {
     medicals = s.docs.map(d => ({id:d.id,...d.data()}));
     renderMedical();
   }));
-  unsubs.push(onSnapshot(query(uc('schools'), orderBy('date','desc')), s => {
+  unsubs.push(onSnapshot(query(hc('schools'), orderBy('date','desc')), s => {
     schools = s.docs.map(d => ({id:d.id,...d.data()}));
     renderSchool();
   }));
   loadKidsCard();
 }
 
-// ── Tabs ────────────────────────────────────────────────────────────────────────────
+// ── Tabs ────────────────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
@@ -816,7 +1048,7 @@ document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', (
   if (b.dataset.tab === 'budget' && !budgetData) loadBudget();
 }));
 
-// ── Dashboard ───────────────────────────────────────────────────────────────────────────
+// ── Dashboard ────────────────────────────────────────────────────────────────────────────────
 function updateDash() {
   const today = new Date();
   const who = custody(today);
@@ -855,7 +1087,7 @@ function updateDash() {
   else recEl.innerHTML = expenses.slice(0,5).map(e => txnRow(e,'expense')).join('');
 }
 
-// ── Expenses ────────────────────────────────────────────────────────────────────────────
+// ── Expenses ─────────────────────────────────────────────────────────────────────────────────
 function calcBalance(filter) {
   const now = new Date();
   let exps = expenses;
@@ -901,7 +1133,7 @@ function txnRow(item, type) {
       <div class="txn-icon" style="background:#e8f5f2">💰</div>
       <div class="txn-info"><div class="txn-title">Payment</div><div class="txn-meta">${fmtDate(item.date)} · ${label}</div></div>
       <div class="txn-right"><div class="txn-amount" style="color:var(--mint)">$${item.amount.toFixed(2)}</div>
-        <button class="btn btn-danger btn-sm" style="margin-top:4px" onclick="delPayment('${item.id}')">&#x2715;</button></div>
+        <button class="btn btn-danger btn-sm" style="margin-top:4px" onclick="delPayment('${item.id}')">✕</button></div>
     </div>`;
   }
   const paidLabel = item.paidBy==='me' ? MY : OTHER;
@@ -915,13 +1147,13 @@ function txnRow(item, type) {
     <div class="txn-right">
       <div class="txn-amount">$${item.amount.toFixed(2)}</div>
       <div class="txn-each">$${(item.amount/2).toFixed(2)} each</div>
-      <button class="btn btn-danger btn-sm" style="margin-top:4px" onclick="delExpense('${item.id}')">&#x2715;</button>
+      <button class="btn btn-danger btn-sm" style="margin-top:4px" onclick="delExpense('${item.id}')">✕</button>
     </div>
   </div>`;
 }
 
-window.delExpense = async id => { if(confirm('Delete this expense?')) await deleteDoc(ud('expenses',id)); };
-window.delPayment = async id => { if(confirm('Delete this payment?')) await deleteDoc(ud('payments',id)); };
+window.delExpense = async id => { if(confirm('Delete this expense?')) await deleteDoc(hd('expenses',id)); };
+window.delPayment = async id => { if(confirm('Delete this payment?')) await deleteDoc(hd('payments',id)); };
 
 document.getElementById('btn-add-expense').onclick = () => {
   document.getElementById('expense-form').style.display = 'block';
@@ -940,7 +1172,7 @@ document.getElementById('btn-save-expense').onclick = async () => {
   const category = document.getElementById('ef-cat').value;
   const description = document.getElementById('ef-desc').value.trim();
   if (!date || !amount || !description) { alert('Please fill in date, amount, and description.'); return; }
-  await addDoc(uc('expenses'), { date, amount, kid, paidBy, category, description, createdAt: serverTimestamp() });
+  await addDoc(hc('expenses'), { date, amount, kid, paidBy, category, description, createdAt: serverTimestamp() });
   document.getElementById('expense-form').style.display = 'none';
   document.getElementById('btn-add-expense').style.display = 'block';
   document.getElementById('ef-amount').value = '';
@@ -951,7 +1183,7 @@ document.getElementById('btn-record-payment').onclick = async () => {
   const amount = parseFloat(document.getElementById('pay-amount').value);
   const paidBy = document.getElementById('pay-by').value;
   if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
-  await addDoc(uc('payments'), { date: new Date().toISOString().split('T')[0], amount, paidBy, createdAt: serverTimestamp() });
+  await addDoc(hc('payments'), { date: new Date().toISOString().split('T')[0], amount, paidBy, createdAt: serverTimestamp() });
   document.getElementById('pay-amount').value = '';
 };
 
@@ -1021,7 +1253,7 @@ document.getElementById('btn-save-date').onclick = async () => {
   const notes = document.getElementById('df-notes').value.trim();
   const recurring = document.getElementById('df-recurring').checked;
   if (!date || !title) { alert('Fill in date and title.'); return; }
-  await addDoc(uc('importantDates'), { date, type, title, notes, recurring, createdAt: serverTimestamp() });
+  await addDoc(hc('importantDates'), { date, type, title, notes, recurring, createdAt: serverTimestamp() });
   document.getElementById('date-form').style.display = 'none';
   document.getElementById('df-title').value = ''; document.getElementById('df-notes').value = ''; document.getElementById('df-recurring').checked = false;
 };
@@ -1044,7 +1276,7 @@ function renderDates() {
         ${d.notes?`<div class="date-meta">${esc(d.notes)}</div>`:''}
         <div class="date-meta">${dt.getFullYear()}</div>
       </div>
-      <button class="btn btn-danger btn-sm" onclick="delDate('${d.id}')">&#x2715;</button>
+      <button class="btn btn-danger btn-sm" onclick="delDate('${d.id}')">✕</button>
     </div>`;
   };
   let html = '';
@@ -1052,7 +1284,7 @@ function renderDates() {
   if (past.length) html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mid);margin:14px 0 8px">Past</div>${past.map(row).join('')}`;
   el.innerHTML = html;
 }
-window.delDate = async id => { if(confirm('Delete?')) await deleteDoc(ud('importantDates',id)); };
+window.delDate = async id => { if(confirm('Delete?')) await deleteDoc(hd('importantDates',id)); };
 
 document.getElementById('btn-add-note').onclick = () => document.getElementById('note-form').style.display = 'block';
 document.getElementById('btn-cancel-note').onclick = () => document.getElementById('note-form').style.display = 'none';
@@ -1060,7 +1292,7 @@ document.getElementById('btn-save-note').onclick = async () => {
   const title = document.getElementById('nf-title').value.trim();
   const content = document.getElementById('nf-body').value.trim();
   if (!title) { alert('Add a title.'); return; }
-  await addDoc(uc('notes'), { title, content, createdAt: serverTimestamp() });
+  await addDoc(hc('notes'), { title, content, createdAt: serverTimestamp() });
   document.getElementById('note-form').style.display = 'none';
   document.getElementById('nf-title').value = ''; document.getElementById('nf-body').value = '';
 };
@@ -1071,20 +1303,20 @@ function renderNotes() {
     <div class="note-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="note-title-text">${esc(n.title)}</div>
-        <button class="btn btn-danger btn-sm" onclick="delNote('${n.id}')">&#x2715;</button>
+        <button class="btn btn-danger btn-sm" onclick="delNote('${n.id}')">✕</button>
       </div>
       <div class="note-body">${esc(n.content)}</div>
       ${n.createdAt?`<div class="note-date">${fmtFireTs(n.createdAt)}</div>`:''}
     </div>`).join('');
 }
-window.delNote = async id => { if(confirm('Delete?')) await deleteDoc(ud('notes',id)); };
+window.delNote = async id => { if(confirm('Delete?')) await deleteDoc(hd('notes',id)); };
 
 document.getElementById('btn-add-todo').onclick = addTodo;
 document.getElementById('todo-input').onkeydown = e => { if(e.key==='Enter') addTodo(); };
 async function addTodo() {
   const text = document.getElementById('todo-input').value.trim();
   if (!text) return;
-  await addDoc(uc('todos'), { text, done: false, createdAt: serverTimestamp() });
+  await addDoc(hc('todos'), { text, done: false, createdAt: serverTimestamp() });
   document.getElementById('todo-input').value = '';
 }
 function renderTodos() {
@@ -1095,11 +1327,11 @@ function renderTodos() {
     <div class="todo-item${t.done?' done':''}">
       <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo('${t.id}',this.checked)">
       <div class="todo-text">${esc(t.text)}</div>
-      <button class="btn btn-danger btn-sm" onclick="delTodo('${t.id}')">&#x2715;</button>
+      <button class="btn btn-danger btn-sm" onclick="delTodo('${t.id}')">✕</button>
     </div>`).join('');
 }
-window.toggleTodo = async (id, done) => await updateDoc(ud('todos',id), { done });
-window.delTodo = async id => { if(confirm('Delete?')) await deleteDoc(ud('todos',id)); };
+window.toggleTodo = async (id, done) => await updateDoc(hd('todos',id), { done });
+window.delTodo = async id => { if(confirm('Delete?')) await deleteDoc(hd('todos',id)); };
 
 document.getElementById('btn-add-travel').onclick = () => document.getElementById('travel-form').style.display = 'block';
 document.getElementById('btn-cancel-travel').onclick = () => document.getElementById('travel-form').style.display = 'none';
@@ -1110,7 +1342,7 @@ document.getElementById('btn-save-travel').onclick = async () => {
   const who = document.getElementById('tf-who').value;
   const notes = document.getElementById('tf-notes').value.trim();
   if (!destination || !startDate) { alert('Fill in destination and start date.'); return; }
-  await addDoc(uc('travels'), { destination, startDate, endDate, who, notes, createdAt: serverTimestamp() });
+  await addDoc(hc('travels'), { destination, startDate, endDate, who, notes, createdAt: serverTimestamp() });
   document.getElementById('travel-form').style.display = 'none';
   document.getElementById('tf-dest').value = ''; document.getElementById('tf-notes').value = '';
 };
@@ -1124,10 +1356,10 @@ function renderTravel() {
       <div class="txn-meta">${fmtDate(t.startDate)}${t.endDate?' – '+fmtDate(t.endDate):''} · ${esc(t.who)}</div>
       ${t.notes?`<div class="txn-meta">${esc(t.notes)}</div>`:''}
     </div>
-    <button class="btn btn-danger btn-sm" onclick="delTravel('${t.id}')">&#x2715;</button>
+    <button class="btn btn-danger btn-sm" onclick="delTravel('${t.id}')">✕</button>
   </div>`).join('');
 }
-window.delTravel = async id => { if(confirm('Delete?')) await deleteDoc(ud('travels',id)); };
+window.delTravel = async id => { if(confirm('Delete?')) await deleteDoc(hd('travels',id)); };
 
 document.getElementById('btn-add-medical').onclick = () => {
   document.getElementById('medical-form').style.display = 'block';
@@ -1141,7 +1373,7 @@ document.getElementById('btn-save-medical').onclick = async () => {
   const doctor = document.getElementById('mf-doctor').value.trim();
   const notes = document.getElementById('mf-notes').value.trim();
   if (!date) { alert('Select a date.'); return; }
-  await addDoc(uc('medicals'), { kid, date, type, doctor, notes, createdAt: serverTimestamp() });
+  await addDoc(hc('medicals'), { kid, date, type, doctor, notes, createdAt: serverTimestamp() });
   document.getElementById('medical-form').style.display = 'none';
   document.getElementById('mf-doctor').value = ''; document.getElementById('mf-notes').value = '';
 };
@@ -1155,10 +1387,10 @@ function renderMedical() {
       <div class="txn-meta">${fmtDate(m.date)}${m.doctor?' · '+esc(m.doctor):''}</div>
       ${m.notes?`<div class="txn-meta">${esc(m.notes)}</div>`:''}
     </div>
-    <button class="btn btn-danger btn-sm" onclick="delMedical('${m.id}')">&#x2715;</button>
+    <button class="btn btn-danger btn-sm" onclick="delMedical('${m.id}')">✕</button>
   </div>`).join('');
 }
-window.delMedical = async id => { if(confirm('Delete?')) await deleteDoc(ud('medicals',id)); };
+window.delMedical = async id => { if(confirm('Delete?')) await deleteDoc(hd('medicals',id)); };
 
 document.getElementById('btn-add-school').onclick = () => {
   document.getElementById('school-form').style.display = 'block';
@@ -1171,7 +1403,7 @@ document.getElementById('btn-save-school').onclick = async () => {
   const title = document.getElementById('sf-title').value.trim();
   const notes = document.getElementById('sf-notes').value.trim();
   if (!date || !title) { alert('Fill in date and event.'); return; }
-  await addDoc(uc('schools'), { kid, date, title, notes, createdAt: serverTimestamp() });
+  await addDoc(hc('schools'), { kid, date, title, notes, createdAt: serverTimestamp() });
   document.getElementById('school-form').style.display = 'none';
   document.getElementById('sf-title').value = ''; document.getElementById('sf-notes').value = '';
 };
@@ -1185,13 +1417,13 @@ function renderSchool() {
       <div class="txn-meta">${fmtDate(s.date)} · ${esc(s.kid)}</div>
       ${s.notes?`<div class="txn-meta">${esc(s.notes)}</div>`:''}
     </div>
-    <button class="btn btn-danger btn-sm" onclick="delSchool('${s.id}')">&#x2715;</button>
+    <button class="btn btn-danger btn-sm" onclick="delSchool('${s.id}')">✕</button>
   </div>`).join('');
 }
-window.delSchool = async id => { if(confirm('Delete?')) await deleteDoc(ud('schools',id)); };
+window.delSchool = async id => { if(confirm('Delete?')) await deleteDoc(hd('schools',id)); };
 
 async function loadKidsCard() {
-  const snap = await getDoc(ud('kidsInfo','config'));
+  const snap = await getDoc(hd('kidsInfo','config'));
   const info = snap.exists() ? snap.data() : { kid1:{}, kid2:{} };
   const el = document.getElementById('kids-card');
   el.innerHTML = `
@@ -1222,7 +1454,7 @@ window.saveKids = async () => {
       const el = document.getElementById(`${k}-${f}`); if(el) data[k][f] = el.value;
     });
   });
-  await setDoc(ud('kidsInfo','config'), data);
+  await setDoc(hd('kidsInfo','config'), data);
   if (data.kid1?.name) kidsNames.k1 = data.kid1.name;
   if (data.kid2?.name) kidsNames.k2 = data.kid2.name;
   updateKidsDropdowns();
@@ -1240,7 +1472,7 @@ const DEFAULT_CATS = [
 async function loadBudget() {
   const now = new Date();
   const key = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const snap = await getDoc(ud('budget',key));
+  const snap = await getDoc(hd('budget',key));
   budgetData = snap.exists() ? snap.data() : { categories: DEFAULT_CATS, month: key };
   renderBudget();
 }
@@ -1301,7 +1533,7 @@ window.saveBudget = async () => {
   });
   const now = new Date();
   const key = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  await setDoc(ud('budget',key), budgetData);
+  await setDoc(hd('budget',key), budgetData);
   renderBudget();
 };
 </script>
