@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Kapwa"/>
+  <meta name="theme-color" content="#1E5F4E"/>
+  <title>Kapwa — Between Sessions</title>
+  <style>
+    :root {
+      --bg: #F7F0E8;
+      --card: #FFFFFF;
+      --primary: #1E5F4E;
+      --primary-mid: #2E8B6E;
+      --primary-light: #5BAD8A;
+      --accent: #C4714A;
+      --accent-light: #E8A882;
+      --gold: #C8902A;
+      --gold-light: #F5D589;
+      --text: #2A1A0E;
+      --text-mid: #5A3E2B;
+      --muted: #8C7B6B;
+      --border: #E2D0BC;
+      --success: #2E7D5E;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(30,95,78,0.11);
+      --nav-h: 68px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      background: var(--primary);
+      padding: 14px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 14px rgba(30,95,78,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 1.45rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .logo span { color: var(--gold-light); }
+    .header-right { text-align: right; }
+    .header-date { font-size: 0.7rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .header-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transition: background 0.4s;
+      margin-left: auto;
+    }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: stretch;
+      height: var(--nav-h);
+      z-index: 100;
+      box-shadow: 0 -2px 14px rgba(0,0,0,0.07);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      border: none; background: none; cursor: pointer;
+      padding: 8px 2px; color: var(--muted);
+      font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      transition: color 0.18s;
+    }
+    .nav-btn.active { color: var(--primary); }
+    .nav-btn svg { width: 21px; height: 21px; }
+
+    /* ── Sections ── */
+    .section { display: none; padding: 20px 16px; animation: fadeIn 0.25s ease-out; }
+    .section.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 18px; margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* ── Typography ── */
+    h2 { font-size: 1.1rem; font-weight: 700; }
+    h3 { font-size: 0.95rem; font-weight: 600; }
+    p { line-height: 1.6; font-size: 0.88rem; color: var(--text-mid); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 18px; border-radius: 10px; border: none;
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: all 0.18s; font-family: inherit;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:active { background: var(--primary-mid); }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-sm { padding: 7px 13px; font-size: 0.8rem; }
+    .btn-full { width: 100%; }
+
+    /* ── Inputs ── */
+    input[type=text], input[type=date], textarea, select {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.875rem; font-family: inherit;
+      color: var(--text); background: #fff;
+      margin-bottom: 10px; outline: none;
+      transition: border-color 0.18s;
+      -webkit-appearance: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    label { font-size: 0.78rem; font-weight: 600; color: var(--text-mid); display: block; margin-bottom: 4px; }
+    textarea { resize: vertical; min-height: 78px; }
+
+    /* ── Home ── */
+    .greeting { font-size: 1.35rem; font-weight: 800; color: var(--primary); margin-bottom: 3px; }
+    .greeting-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; }
+
+    .affirmation-card {
+      background: linear-gradient(135deg, var(--primary) 0%, #2E7A60 100%);
+      border-radius: var(--radius); padding: 22px 20px; margin-bottom: 16px;
+    }
+    .affirmation-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.65); margin-bottom: 8px; }
+    .affirmation-text { font-size: 1rem; font-weight: 600; line-height: 1.55; color: #fff; }
+    .affirmation-tagalog { font-size: 0.78rem; color: rgba(255,255,255,0.72); margin-top: 7px; font-style: italic; }
+
+    .summary-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .summary-item {
+      flex: 1; background: var(--card); border-radius: 12px;
+      padding: 13px; text-align: center; box-shadow: var(--shadow);
+    }
+    .summary-num { font-size: 1.45rem; font-weight: 800; color: var(--primary); }
+    .summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 2px; }
+
+    .quick-checkin { display: flex; gap: 8px; flex-wrap: wrap; }
+    .emotion-chip {
+      padding: 7px 13px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: #fff;
+      font-size: 0.78rem; cursor: pointer; transition: all 0.18s;
+    }
+    .emotion-chip.selected, .emotion-chip:active {
+      background: var(--primary); color: #fff; border-color: var(--primary);
+    }
+
+    .checkin-response {
+      display: none; margin-top: 12px; padding: 10px 13px;
+      background: var(--bg); border-radius: 9px;
+      font-size: 0.83rem; line-height: 1.55; color: var(--text-mid);
+      border-left: 3px solid var(--primary-light);
+    }
+
+    .journal-entry {
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 12px; margin-top: 8px;
+      font-size: 0.83rem; line-height: 1.6; color: var(--text-mid);
+    }
+
+    /* ── Habits ── */
+    .add-form { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
+    .habit-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; background: var(--card);
+      border-radius: 12px; margin-bottom: 10px;
+      box-shadow: var(--shadow);
+    }
+    .habit-check {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2.5px solid var(--border); background: #fff;
+      flex-shrink: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .habit-check.done { background: var(--primary); border-color: var(--primary); }
+    .habit-check.done::after { content: '✓'; color: #fff; font-size: 14px; font-weight: 700; }
+    .habit-info { flex: 1; min-width: 0; }
+    .habit-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .habit-name.done { text-decoration: line-through; opacity: 0.55; }
+    .habit-streak { font-size: 0.73rem; color: var(--accent); font-weight: 600; margin-top: 2px; }
+    .habit-dots { display: flex; gap: 4px; margin-top: 5px; }
+    .habit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .habit-dot.done { background: var(--primary-light); }
+    .habit-delete { padding: 4px 8px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── Goals ── */
+    .goal-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+    .goal-card.complete { border-left-color: var(--success); opacity: 0.82; }
+    .goal-card.on-hold { border-left-color: var(--gold); }
+    .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+    .goal-title { font-size: 0.93rem; font-weight: 700; flex: 1; }
+    .goal-badge {
+      font-size: 0.62rem; padding: 3px 8px; border-radius: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+    }
+    .badge-active { background: #e8f5f0; color: var(--primary); }
+    .badge-complete { background: #e8f0e8; color: var(--success); }
+    .badge-hold { background: #fdf3e0; color: var(--gold); }
+    .goal-meta { font-size: 0.76rem; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 8px 0 4px; }
+    .progress-fill { height: 100%; background: var(--primary-light); border-radius: 3px; transition: width 0.5s ease; }
+    .smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+    .smart-field label { color: var(--primary); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── Values ── */
+    .values-intro { font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; margin-bottom: 14px; }
+    .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .value-chip {
+      padding: 12px 10px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: #fff;
+      text-align: center; cursor: pointer; transition: all 0.18s;
+    }
+    .value-chip:active { border-color: var(--primary); }
+    .value-chip.selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .value-en { font-size: 0.83rem; font-weight: 700; }
+    .value-fil { font-size: 0.68rem; opacity: 0.68; margin-top: 2px; }
+    .selected-count { text-align: center; font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+    .selected-count .cnt { font-weight: 800; color: var(--primary); font-size: 1.3rem; }
+
+    /* ── Emotion Toolkit ── */
+    .tool-tabs {
+      display: flex; gap: 6px; margin-bottom: 16px;
+      overflow-x: auto; padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tool-tabs::-webkit-scrollbar { display: none; }
+    .tool-tab {
+      padding: 8px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: #fff;
+      font-size: 0.76rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; color: var(--text-mid);
+      transition: all 0.18s; font-family: inherit; flex-shrink: 0;
+    }
+    .tool-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .tool-panel { display: none; }
+    .tool-panel.active { display: block; }
+
+    .emotion-wheel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .emotion-btn {
+      padding: 13px 6px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: #fff;
+      text-align: center; cursor: pointer; transition: all 0.18s;
+      font-size: 0.78rem; font-weight: 600; font-family: inherit;
+    }
+    .emotion-btn .eicon { font-size: 1.35rem; display: block; margin-bottom: 4px; }
+    .emotion-btn.joy.selected     { background: #FFF8E0; border-color: var(--gold); }
+    .emotion-btn.sadness.selected { background: #EAF2FA; border-color: #5A90BC; }
+    .emotion-btn.fear.selected    { background: #F5EFF8; border-color: #9060B4; }
+    .emotion-btn.anger.selected   { background: #FCEEE8; border-color: var(--accent); }
+    .emotion-btn.shame.selected   { background: #EEF5EE; border-color: #4A7A4A; }
+    .emotion-btn.calm.selected    { background: #E8F5F2; border-color: var(--primary); }
+
+    .intensity-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .intensity-row label { width: 65px; flex-shrink: 0; margin: 0; }
+    input[type=range] { flex: 1; margin: 0; accent-color: var(--primary); }
+    .intensity-val { width: 28px; text-align: right; font-weight: 700; color: var(--primary); font-size: 0.9rem; }
+
+    /* ── Urge Surfing ── */
+    .wave-container {
+      position: relative; height: 130px;
+      background: linear-gradient(to bottom, #eaf6f2, #c5ebe0);
+      border-radius: 12px; overflow: hidden; margin: 14px 0;
+    }
+    #wave-canvas { position: absolute; bottom: 0; width: 100%; height: 100%; }
+    .wave-overlay {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 2px;
+    }
+    .urge-phase-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); }
+    .urge-timer-disp { font-size: 2.1rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    .urge-sub { font-size: 0.76rem; color: var(--text-mid); }
+
+    /* ── Grounding ── */
+    .grounding-step {
+      background: var(--card); border-radius: 10px;
+      padding: 14px; margin-bottom: 10px;
+      border-left: 3px solid var(--primary-light);
+    }
+    .grounding-num { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; }
+    .grounding-instr { font-size: 0.88rem; font-weight: 600; margin: 4px 0 8px; }
+
+    /* ── TIPP ── */
+    .tipp-card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: var(--shadow); }
+    .tipp-letter {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--primary); color: #fff;
+      font-weight: 800; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+    }
+    .tipp-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .tipp-desc { font-size: 0.8rem; color: var(--text-mid); line-height: 1.55; }
+
+    /* ── Opposite Action ── */
+    .oa-box {
+      padding: 13px; background: var(--bg); border-radius: 10px; margin-bottom: 8px;
+    }
+    .oa-emotion { font-size: 0.83rem; font-weight: 700; margin-bottom: 5px; }
+    .oa-desc { font-size: 0.8rem; color: var(--text-mid); line-height: 1.5; }
+
+    /* ── Breathing ── */
+    .breath-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .breath-option {
+      padding: 13px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: #fff;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .breath-option.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .breath-name { font-size: 0.83rem; font-weight: 700; margin-bottom: 2px; }
+    .breath-pattern { font-size: 0.7rem; opacity: 0.68; }
+
+    .breath-arena { display: flex; flex-direction: column; align-items: center; margin: 18px 0 6px; }
+    .breath-circle {
+      width: 152px; height: 152px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 36%, var(--primary-light), var(--primary));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.88rem; font-weight: 600; text-align: center;
+      box-shadow: 0 0 0 0 rgba(30,95,78,0.25);
+      will-change: transform;
+      padding: 16px;
+    }
+    @keyframes b-in  { from { transform: scale(1); box-shadow: 0 0 0 0 rgba(30,95,78,0.25); } to { transform: scale(1.36); box-shadow: 0 0 0 24px rgba(30,95,78,0.07); } }
+    @keyframes b-out { from { transform: scale(1.36); box-shadow: 0 0 0 24px rgba(30,95,78,0.04); } to { transform: scale(1); box-shadow: 0 0 0 0 rgba(30,95,78,0); } }
+    @keyframes b-hold-in  { 0%, 100% { transform: scale(1.36); } }
+    @keyframes b-hold-out { 0%, 100% { transform: scale(1); } }
+    .bc-inhale    { animation-name: b-in; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
+    .bc-exhale    { animation-name: b-out; animation-timing-function: ease-in-out; animation-fill-mode: forwards; }
+    .bc-hold-in   { animation-name: b-hold-in; animation-timing-function: linear; animation-fill-mode: forwards; }
+    .bc-hold-out  { animation-name: b-hold-out; animation-timing-function: linear; animation-fill-mode: forwards; }
+
+    .breath-phase-lbl { margin-top: 18px; font-size: 1rem; font-weight: 700; color: var(--primary); text-align: center; }
+    .breath-cycle-lbl { margin-top: 5px; font-size: 0.78rem; color: var(--muted); text-align: center; }
+    .breath-controls { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.48);
+      z-index: 200; display: none; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      background: #fff; border-radius: 20px 20px 0 0;
+      padding: 22px 20px 40px; width: 100%; max-width: 480px;
+      max-height: 92vh; overflow-y: auto;
+    }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+
+    /* ── Misc ── */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .empty-state { text-align: center; padding: 32px 20px; color: var(--muted); }
+    .empty-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .saved-msg { display: none; margin-top: 8px; font-size: 0.76rem; color: var(--success); font-weight: 600; }
+    .sub-emotions { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0 12px; }
+    .sub-chip {
+      padding: 5px 11px; border-radius: 16px;
+      border: 1.5px solid var(--border); background: #fff;
+      font-size: 0.75rem; cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .sub-chip.sel { background: var(--primary-light); border-color: var(--primary-light); color: #fff; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    .fire { display: inline-block; animation: pulse 1.4s infinite; }
+  </style>
+</head>
+<body>
+
+<!-- ╔═══════════════╗ -->
+<!-- ║    HEADER     ║ -->
+<!-- ╚═══════════════╝ -->
+<header class="app-header">
+  <div>
+    <div class="logo">Kapwa<span>·</span></div>
+  </div>
+  <div class="header-right">
+    <div class="header-date" id="header-date"></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ════════════════════════════════
+     HOME — TAHANAN
+════════════════════════════════ -->
+<section id="sec-home" class="section active">
+  <div class="greeting" id="greeting"></div>
+  <div class="greeting-sub">This is your space between sessions.</div>
+
+  <div class="affirmation-card">
+    <div class="affirmation-label">Paalala Ngayon · Today's Reminder</div>
+    <div class="affirmation-text" id="aff-text"></div>
+    <div class="affirmation-tagalog" id="aff-tagalog"></div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-item">
+      <div class="summary-num" id="stat-habits">–</div>
+      <div class="summary-label">Habits Done</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-num" id="stat-goals">–</div>
+      <div class="summary-label">Active Goals</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-num" id="stat-values">–</div>
+      <div class="summary-label">Core Values</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">How are you right now?</div>
+    <div class="quick-checkin" id="quick-checkin">
+      <div class="emotion-chip" data-e="peaceful">😌 Peaceful</div>
+      <div class="emotion-chip" data-e="anxious">😰 Anxious</div>
+      <div class="emotion-chip" data-e="sad">😔 Sad</div>
+      <div class="emotion-chip" data-e="hopeful">🌱 Hopeful</div>
+      <div class="emotion-chip" data-e="numb">😶 Numb</div>
+      <div class="emotion-chip" data-e="grateful">🙏 Grateful</div>
+      <div class="emotion-chip" data-e="overwhelmed">🌊 Overwhelmed</div>
+      <div class="emotion-chip" data-e="angry">😤 Angry</div>
+    </div>
+    <div class="checkin-response" id="checkin-response"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Between Sessions Journal</div>
+    <p style="margin-bottom:11px;font-size:0.81rem;">What do you want to remember for next session?</p>
+    <textarea id="journal-text" placeholder="Write freely here..."></textarea>
+    <button class="btn btn-primary btn-sm" onclick="saveJournal()">Save Note</button>
+    <div class="saved-msg" id="journal-saved">✓ Saved</div>
+    <div id="journal-entries"></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     HABITS — MGA GAWI
+════════════════════════════════ -->
+<section id="sec-habits" class="section">
+  <div class="card-title" style="margin-bottom:16px;">Mga Gawi · Daily Habits</div>
+
+  <div class="add-form">
+    <div class="card-title">Add a Habit</div>
+    <label>Habit name</label>
+    <input type="text" id="habit-name-input" placeholder="e.g. Morning stretch, Drink water…" onkeydown="if(event.key==='Enter')addHabit()"/>
+    <label>Frequency</label>
+    <select id="habit-freq-input">
+      <option value="daily">Daily</option>
+      <option value="weekday">Weekdays only</option>
+      <option value="any">Any day</option>
+    </select>
+    <button class="btn btn-primary btn-full" onclick="addHabit()">+ Add Habit</button>
+  </div>
+
+  <div id="habits-list"></div>
+  <div id="habits-empty" class="empty-state" style="display:none;">
+    <div class="empty-icon">🌿</div>
+    <p>No habits yet. Start small — one habit at a time builds momentum.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     GOALS — LAYUNIN
+════════════════════════════════ -->
+<section id="sec-goals" class="section">
+  <div class="card-title" style="margin-bottom:14px;">Layunin · SMART Goals</div>
+  <button class="btn btn-primary btn-full" style="margin-bottom:16px;" onclick="openGoalModal()">+ New Goal</button>
+  <div id="goals-list"></div>
+  <div id="goals-empty" class="empty-state" style="display:none;">
+    <div class="empty-icon">🎯</div>
+    <p>No goals yet. What would you like to work towards?</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     VALUES — MGA HALAGA
+════════════════════════════════ -->
+<section id="sec-values" class="section">
+  <div class="card-title" style="margin-bottom:4px;">Mga Halaga · My Values</div>
+  <p class="values-intro">Your values are your compass. Select 5–7 that feel most true to who you are — or who you're becoming.</p>
+
+  <div class="selected-count"><span class="cnt" id="values-count">0</span> selected</div>
+
+  <div class="values-grid" id="values-grid"></div>
+
+  <div class="card" id="values-reflect-card" style="display:none;">
+    <div class="card-title">Values Reflection</div>
+    <p style="margin-bottom:11px;font-size:0.81rem;">Pick one value and reflect: how am I living it today? Where do I want to live it more fully?</p>
+    <label>Focus value</label>
+    <select id="values-reflect-select"></select>
+    <label>Your reflection</label>
+    <textarea id="values-reflect-text" placeholder="I live this value when…"></textarea>
+    <button class="btn btn-primary btn-sm" onclick="saveValuesReflection()">Save Reflection</button>
+    <div class="saved-msg" id="vr-saved">✓ Reflection saved</div>
+  </div>
+
+  <button class="btn btn-primary btn-full" style="margin-top:4px;" onclick="saveValues()">Save My Values</button>
+  <div class="saved-msg" id="values-saved" style="text-align:center;margin-top:10px;">✓ Values saved</div>
+</section>
+
+<!-- ════════════════════════════════
+     EMOTIONS — DAMDAMIN
+════════════════════════════════ -->
+<section id="sec-emotions" class="section">
+  <div class="card-title" style="margin-bottom:14px;">Damdamin · Emotion Toolkit</div>
+
+  <div class="tool-tabs">
+    <button class="tool-tab active" data-tab="checkin">Check-In</button>
+    <button class="tool-tab" data-tab="urge">Urge Surfing</button>
+    <button class="tool-tab" data-tab="ground">Grounding</button>
+    <button class="tool-tab" data-tab="tipp">TIPP Skills</button>
+    <button class="tool-tab" data-tab="opposite">Opposite Action</button>
+  </div>
+
+  <!-- CHECK-IN -->
+  <div class="tool-panel active" id="panel-checkin">
+    <div class="card">
+      <div class="card-title">What am I feeling?</div>
+      <div class="emotion-wheel">
+        <button class="emotion-btn joy"     data-emotion="Joy"         data-subs="Happy,Excited,Grateful,Content,Hopeful,Loving,Playful"><span class="eicon">😊</span>Joy</button>
+        <button class="emotion-btn sadness" data-emotion="Sadness"     data-subs="Lonely,Disappointed,Hopeless,Grief,Heartbroken,Empty"><span class="eicon">😢</span>Sadness</button>
+        <button class="emotion-btn fear"    data-emotion="Fear/Anxiety" data-subs="Worried,Nervous,Scared,Overwhelmed,Panicked,Dread"><span class="eicon">😰</span>Fear</button>
+        <button class="emotion-btn anger"   data-emotion="Anger"       data-subs="Frustrated,Irritated,Resentful,Furious,Betrayed"><span class="eicon">😤</span>Anger</button>
+        <button class="emotion-btn shame"   data-emotion="Shame/Guilt" data-subs="Embarrassed,Regretful,Worthless,Inadequate,Humiliated"><span class="eicon">😔</span>Shame</button>
+        <button class="emotion-btn calm"    data-emotion="Calm"        data-subs="Relaxed,Safe,Centered,Present,Grounded,Peaceful"><span class="eicon">😌</span>Calm</button>
+      </div>
+
+      <div id="sub-emotions-wrap" style="display:none;">
+        <div class="card-title" style="margin-bottom:6px;">More specifically…</div>
+        <div class="sub-emotions" id="sub-emotions-grid"></div>
+      </div>
+
+      <div class="intensity-row">
+        <label>Intensity</label>
+        <input type="range" id="emotion-intensity" min="1" max="10" value="5"
+               oninput="document.getElementById('int-val').textContent=this.value"/>
+        <span class="intensity-val" id="int-val">5</span>
+      </div>
+
+      <label>What prompted this feeling?</label>
+      <textarea id="emotion-prompt" placeholder="What happened? What were you thinking?"></textarea>
+      <button class="btn btn-primary btn-full" onclick="logEmotion()">Log This Feeling</button>
+      <div id="emotion-log" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- URGE SURFING -->
+  <div class="tool-panel" id="panel-urge">
+    <div class="card">
+      <div class="card-title">Urge Surfing</div>
+      <p style="margin-bottom:13px;">Urges come in waves — they build, peak, and always subside. You don't have to act on an urge. Just observe it like a wave you're riding.</p>
+
+      <label>What urge are you surfing?</label>
+      <input type="text" id="urge-describe" placeholder="e.g. urge to isolate, to lash out, to use…"/>
+
+      <div class="wave-container">
+        <canvas id="wave-canvas"></canvas>
+        <div class="wave-overlay">
+          <div class="urge-phase-lbl" id="urge-phase-lbl">Ready</div>
+          <div class="urge-timer-disp" id="urge-timer-disp">0:00</div>
+          <div class="urge-sub" id="urge-sub-lbl">Press Start when you feel the urge</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-primary" id="urge-start-btn" onclick="startUrgeSurf()" style="flex:1;">Start Surfing</button>
+        <button class="btn btn-outline" id="urge-stop-btn" onclick="stopUrgeSurf()" style="display:none;">Stop</button>
+      </div>
+
+      <div id="urge-reflection" style="display:none;">
+        <div class="divider"></div>
+        <div class="card-title">After the Wave</div>
+        <label>What did you notice? How do you feel now?</label>
+        <textarea id="urge-after-text" placeholder="I noticed the urge peaked around… then…"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="saveUrgeReflection()">Save</button>
+        <div class="saved-msg" id="urge-saved">✓ Saved — you rode the wave</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUNDING 5-4-3-2-1 -->
+  <div class="tool-panel" id="panel-ground">
+    <div class="card">
+      <div class="card-title">5-4-3-2-1 Grounding</div>
+      <p style="margin-bottom:15px;">Use your senses to anchor yourself to the present moment. Especially helpful when anxious or overwhelmed.</p>
+
+      <div class="grounding-step">
+        <div class="grounding-num">5 things you can SEE 👁</div>
+        <div class="grounding-instr">Look around. Name 5 things visible right now.</div>
+        <input type="text" id="ground-5" placeholder="e.g. a lamp, my hands, the window…" style="margin-bottom:0;"/>
+      </div>
+      <div class="grounding-step">
+        <div class="grounding-num">4 things you can TOUCH 🤚</div>
+        <div class="grounding-instr">Feel the texture, temperature, pressure.</div>
+        <input type="text" id="ground-4" placeholder="e.g. the chair, my clothing, the desk…" style="margin-bottom:0;"/>
+      </div>
+      <div class="grounding-step">
+        <div class="grounding-num">3 things you can HEAR 👂</div>
+        <div class="grounding-instr">Listen. What sounds are around you?</div>
+        <input type="text" id="ground-3" placeholder="e.g. traffic, breathing, music…" style="margin-bottom:0;"/>
+      </div>
+      <div class="grounding-step">
+        <div class="grounding-num">2 things you can SMELL 👃</div>
+        <div class="grounding-instr">Any scents, even faint ones.</div>
+        <input type="text" id="ground-2" placeholder="e.g. coffee, fresh air…" style="margin-bottom:0;"/>
+      </div>
+      <div class="grounding-step">
+        <div class="grounding-num">1 thing you can TASTE 👅</div>
+        <div class="grounding-instr">Taste in your mouth, or take a sip.</div>
+        <input type="text" id="ground-1" placeholder="e.g. mint, water…" style="margin-bottom:0;"/>
+      </div>
+
+      <button class="btn btn-primary btn-full" style="margin-top:12px;" onclick="completeGrounding()">Complete ✓</button>
+      <div id="grounding-done" style="display:none;margin-top:12px;padding:14px;background:var(--bg);border-radius:10px;text-align:center;font-size:0.88rem;color:var(--primary);font-weight:600;line-height:1.5;">
+        You're here. You're present.<br>That took courage. 🌿
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPP SKILLS -->
+  <div class="tool-panel" id="panel-tipp">
+    <div class="card">
+      <div class="card-title">TIPP Skills</div>
+      <p style="margin-bottom:15px;">TIPP quickly changes your body chemistry to bring down overwhelming emotion. Use when you need immediate relief.</p>
+
+      <div class="tipp-card">
+        <div class="tipp-letter">T</div>
+        <div class="tipp-title">Temperature</div>
+        <div class="tipp-desc">Hold ice cubes, splash cold water on your face, or hold a cold drink against your cheeks. Cold water activates your dive reflex, rapidly slowing your heart rate. Even 30 seconds helps.</div>
+      </div>
+      <div class="tipp-card">
+        <div class="tipp-letter">I</div>
+        <div class="tipp-title">Intense Exercise</div>
+        <div class="tipp-desc">Do 10 jumping jacks, run in place, or push-ups for 1–2 minutes. Match your physical intensity to your emotional intensity — then let both settle together.</div>
+      </div>
+      <div class="tipp-card">
+        <div class="tipp-letter">P</div>
+        <div class="tipp-title">Paced Breathing</div>
+        <div class="tipp-desc">Breathe out longer than you breathe in. Inhale for 4 counts, exhale for 6–8. This activates your parasympathetic nervous system and calms the body directly.</div>
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="navigate('breathe')">Go to Breathing →</button>
+      </div>
+      <div class="tipp-card">
+        <div class="tipp-letter" style="background:var(--accent);">P</div>
+        <div class="tipp-title">Paired Muscle Relaxation</div>
+        <div class="tipp-desc">Tense each muscle group tightly for 5 seconds, then release completely. Start at your feet, move upward. Notice the contrast between tension and release — this is your body learning to let go.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPPOSITE ACTION -->
+  <div class="tool-panel" id="panel-opposite">
+    <div class="card">
+      <div class="card-title">Opposite Action</div>
+      <p style="margin-bottom:14px;">When an emotion drives you toward a behavior that won't help, acting opposite to the urge changes the emotion itself.</p>
+
+      <div class="oa-box">
+        <div class="oa-emotion" style="color:var(--gold);">Fear/Anxiety → wants avoidance</div>
+        <div class="oa-desc">Opposite: Approach what you fear (gradually). Do the thing you're avoiding. Stand tall, breathe open.</div>
+      </div>
+      <div class="oa-box">
+        <div class="oa-emotion" style="color:var(--accent);">Anger → wants to attack or push away</div>
+        <div class="oa-desc">Opposite: Step back gently. Use a softer tone. Do one kind thing (when safe) for the person you're angry with.</div>
+      </div>
+      <div class="oa-box">
+        <div class="oa-emotion" style="color:#5A90BC;">Sadness → wants to withdraw</div>
+        <div class="oa-desc">Opposite: Get active. Reach out. Do one small thing you would enjoy. Walk, call someone you trust.</div>
+      </div>
+      <div class="oa-box">
+        <div class="oa-emotion" style="color:#4A7A4A;">Shame → wants to hide or shrink</div>
+        <div class="oa-desc">Opposite: Share with someone safe. Hold your head up. Remind yourself: you are worthy as you are.</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="card-title">My Opposite Action Right Now</div>
+      <label>I'm feeling…</label>
+      <input type="text" id="oa-feeling" placeholder="e.g. ashamed about the argument"/>
+      <label>The urge is to…</label>
+      <input type="text" id="oa-urge" placeholder="e.g. hide and not reply"/>
+      <label>My opposite action will be…</label>
+      <input type="text" id="oa-action" placeholder="e.g. send a short message, apologise"/>
+      <button class="btn btn-primary btn-full" onclick="saveOppositeAction()">Commit to This Action</button>
+      <div id="oa-saved" style="display:none;margin-top:10px;padding:12px;background:var(--bg);border-radius:9px;text-align:center;font-size:0.85rem;color:var(--primary);font-weight:700;">
+        Committed. You've got this. 💚
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════
+     BREATHING — HININGA
+════════════════════════════════ -->
+<section id="sec-breathe" class="section">
+  <div class="card-title" style="margin-bottom:14px;">Hininga · Breathing Exercises</div>
+
+  <div class="breath-selector" id="breath-selector">
+    <div class="breath-option active" data-id="box" onclick="selectBreath('box')">
+      <div class="breath-name">Box Breathing</div>
+      <div class="breath-pattern">4 · 4 · 4 · 4</div>
+    </div>
+    <div class="breath-option" data-id="478" onclick="selectBreath('478')">
+      <div class="breath-name">4-7-8 Calm</div>
+      <div class="breath-pattern">4 · 7 · 8</div>
+    </div>
+    <div class="breath-option" data-id="physio" onclick="selectBreath('physio')">
+      <div class="breath-name">Physiological Sigh</div>
+      <div class="breath-pattern">in · in · long out</div>
+    </div>
+    <div class="breath-option" data-id="extended" onclick="selectBreath('extended')">
+      <div class="breath-name">Extended Exhale</div>
+      <div class="breath-pattern">4 · 0 · 8</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="breath-title">Box Breathing</div>
+    <p id="breath-desc">Equal inhale, hold, exhale, hold. Balances the nervous system. Used by athletes and anyone needing calm focus.</p>
+  </div>
+
+  <div class="breath-arena">
+    <div class="breath-circle" id="breath-circle">Press Start</div>
+    <div class="breath-phase-lbl" id="breath-phase-lbl"></div>
+    <div class="breath-cycle-lbl" id="breath-cycle-lbl"></div>
+  </div>
+
+  <div class="breath-controls">
+    <button class="btn btn-primary" id="breath-start-btn" onclick="startBreathing()">Start</button>
+    <button class="btn btn-outline" id="breath-stop-btn" style="display:none;" onclick="stopBreathing()">Stop</button>
+  </div>
+
+  <div class="card" style="margin-top:20px;text-align:center;display:none;" id="breath-done-card">
+    <div style="font-size:1.6rem;margin-bottom:8px;">🌿</div>
+    <div style="font-weight:700;margin-bottom:5px;">Session Complete</div>
+    <div style="font-size:0.82rem;color:var(--muted);" id="breath-done-msg"></div>
+  </div>
+</section>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-section="home" onclick="navigate('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Tahanan
+  </button>
+  <button class="nav-btn" data-section="habits" onclick="navigate('habits')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Gawi
+  </button>
+  <button class="nav-btn" data-section="goals" onclick="navigate('goals')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    Layunin
+  </button>
+  <button class="nav-btn" data-section="values" onclick="navigate('values')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    Halaga
+  </button>
+  <button class="nav-btn" data-section="emotions" onclick="navigate('emotions')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    Damdamin
+  </button>
+  <button class="nav-btn" data-section="breathe" onclick="navigate('breathe')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4"/><path d="M12 8v4l3 3"/></svg>
+    Hininga
+  </button>
+</nav>
+
+<!-- Goal Modal -->
+<div class="modal-overlay" id="goal-modal" onclick="if(event.target===this)closeGoalModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 style="margin-bottom:4px;" id="goal-modal-title">New Goal</h2>
+    <p style="margin-bottom:16px;font-size:0.81rem;color:var(--muted);">Use the SMART framework to set a meaningful, achievable goal.</p>
+
+    <label>Goal Title</label>
+    <input type="text" id="goal-title-input" placeholder="e.g. Exercise 3× per week for a month…"/>
+
+    <div class="smart-grid">
+      <div class="smart-field">
+        <label>S — Specific</label>
+        <input type="text" id="goal-specific" placeholder="What exactly?"/>
+      </div>
+      <div class="smart-field">
+        <label>M — Measurable</label>
+        <input type="text" id="goal-measurable" placeholder="How will you know?"/>
+      </div>
+      <div class="smart-field">
+        <label>A — Achievable</label>
+        <input type="text" id="goal-achievable" placeholder="Is it realistic?"/>
+      </div>
+      <div class="smart-field">
+        <label>R — Relevant</label>
+        <input type="text" id="goal-relevant" placeholder="Why does it matter?"/>
+      </div>
+    </div>
+
+    <label>T — Target Date</label>
+    <input type="date" id="goal-date"/>
+
+    <label>Progress</label>
+    <div class="intensity-row" style="margin-bottom:10px;">
+      <input type="range" id="goal-progress" min="0" max="100" value="0"
+             oninput="document.getElementById('goal-prog-val').textContent=this.value+'%'" style="flex:1;margin:0;"/>
+      <span class="intensity-val" id="goal-prog-val" style="width:40px;">0%</span>
+    </div>
+
+    <label>Status</label>
+    <select id="goal-status">
+      <option value="active">In Progress</option>
+      <option value="complete">Complete ✓</option>
+      <option value="hold">On Hold</option>
+    </select>
+
+    <button class="btn btn-primary btn-full" onclick="saveGoal()">Save Goal</button>
+    <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeGoalModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// STATE & STORAGE
+// ════════════════════════════════════════════════════
+const S = {
+  habits:  () => JSON.parse(localStorage.getItem('kw_habits')  || '[]'),
+  goals:   () => JSON.parse(localStorage.getItem('kw_goals')   || '[]'),
+  values:  () => JSON.parse(localStorage.getItem('kw_values')  || '[]'),
+  emotions:() => JSON.parse(localStorage.getItem('kw_emotions')|| '[]'),
+  journal: () => JSON.parse(localStorage.getItem('kw_journal') || '[]'),
+};
+const save = (k, v) => localStorage.setItem('kw_' + k, JSON.stringify(v));
+const TODAY = () => new Date().toISOString().slice(0, 10);
+
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
+function navigate(section) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + section).classList.add('active');
+  const btn = document.querySelector(`[data-section="${section}"]`);
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ════════════════════════════════════════════════════
+// HOME
+// ════════════════════════════════════════════════════
+const AFFIRMATIONS = [
+  { en: "Healing is not linear. Every small step matters.",                                    fil: "Hindi tuwid ang landas ng paggaling. Bawat hakbang ay mahalaga." },
+  { en: "You are allowed to take up space. Your feelings are valid.",                          fil: "May karapatang lumago ka. Ang iyong damdamin ay totoo at mahalaga." },
+  { en: "Kapwa — you are not alone. We grow through connection.",                              fil: "Kapwa tayo — hindi ka nag-iisa. Lumalago tayo sa pagkakasama." },
+  { en: "Pause. Breathe. You are more than your hardest moments.",                             fil: "Huminto. Huminga. Ikaw ay higit pa sa iyong pinakamahirap na sandali." },
+  { en: "You don't have to figure everything out today.",                                      fil: "Hindi mo kailangang ayusin ang lahat ngayon." },
+  { en: "Rest is not giving up. Rest is preparation for what comes next.",                     fil: "Ang pahinga ay hindi pagsuko. Ito ay paghahanda para sa susunod." },
+  { en: "Your worth is not measured by your productivity.",                                    fil: "Hindi sukatan ang iyong pagpapahalaga sa sarili ang iyong nagagawa." },
+  { en: "Every feeling has a message. You are safe to listen.",                                fil: "Bawat damdamin ay may sinasabi. Ligtas kang makinig." },
+  { en: "Progress lives in the small, consistent choices.",                                    fil: "Ang pag-unlad ay nasa maliliit na ngunit tuluy-tuloy na pagpili." },
+  { en: "Being gentle with yourself is strength, not weakness.",                               fil: "Ang pagiging malambot sa sarili ay lakas, hindi kahinaan." },
+  { en: "You survived every difficult day so far. That is enough.",                            fil: "Nalagpasan mo ang bawat mahirap na araw. Iyon ay sapat na." },
+  { en: "Emotions are visitors, not permanent residents.",                                     fil: "Ang mga damdamin ay pansamantala — hindi permanenteng mananahan." },
+  { en: "You are doing the brave thing by showing up for yourself.",                           fil: "Ginagawa mo ang matapang na bagay sa pamamagitan ng pagharap sa sarili mo." },
+];
+
+const CHECKIN_RESPONSES = {
+  peaceful:    "That's wonderful. Let it nourish you. Stay with it for a moment. 🌿",
+  anxious:     "Anxiety is your nervous system trying to protect you. Try the breathing tools — even 2 minutes helps.",
+  sad:         "Sadness is valid. You don't have to rush past it. Be gentle with yourself today.",
+  hopeful:     "Hope is powerful. Hold onto it, and let it guide your next small step. 🌱",
+  numb:        "Numbness often shows up when we've been carrying too much. Rest is okay. You don't have to feel everything right now.",
+  grateful:    "Gratitude grounds us in what's real and good. Hold onto that. 🙏",
+  overwhelmed: "That's a lot to carry. Start with one breath — just one. The rest can wait.",
+  angry:       "Anger is telling you something matters. Honour that message before deciding what to do with it.",
+};
+
+function initHome() {
+  const now = new Date();
+  const h = now.getHours();
+  document.getElementById('greeting').textContent =
+    h < 12 ? 'Magandang umaga ☀️' : h < 17 ? 'Magandang hapon 🌤' : 'Magandang gabi 🌙';
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const aff = AFFIRMATIONS[now.getDate() % AFFIRMATIONS.length];
+  document.getElementById('aff-text').textContent    = aff.en;
+  document.getElementById('aff-tagalog').textContent = aff.fil;
+
+  updateHomeStats();
+  renderJournalEntries();
+
+  document.querySelectorAll('.emotion-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.emotion-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      const r = document.getElementById('checkin-response');
+      r.textContent = CHECKIN_RESPONSES[chip.dataset.e] || '';
+      r.style.display = 'block';
+    });
+  });
+}
+
+function updateHomeStats() {
+  const today = TODAY();
+  const habits  = S.habits();
+  const goals   = S.goals();
+  const values  = S.values();
+  const done    = habits.filter(h => (h.done_dates || []).includes(today)).length;
+  document.getElementById('stat-habits').textContent = habits.length ? `${done}/${habits.length}` : '–';
+  document.getElementById('stat-goals').textContent  = goals.filter(g => g.status === 'active').length || '–';
+  document.getElementById('stat-values').textContent = values.length || '–';
+}
+
+function saveJournal() {
+  const text = document.getElementById('journal-text').value.trim();
+  if (!text) return;
+  const entries = S.journal();
+  entries.unshift({ text, date: new Date().toLocaleString('en-AU') });
+  save('journal', entries.slice(0, 40));
+  document.getElementById('journal-text').value = '';
+  flashMsg('journal-saved');
+  renderJournalEntries();
+}
+
+function renderJournalEntries() {
+  const entries = S.journal().slice(0, 3);
+  const el = document.getElementById('journal-entries');
+  if (!entries.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="margin-top:16px;"><div class="card-title" style="margin-bottom:7px;">Recent Notes</div>' +
+    entries.map(e => `<div class="journal-entry"><div style="font-size:0.68rem;color:var(--muted);margin-bottom:5px;">${e.date}</div>${e.text}</div>`).join('') +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════
+// HABITS
+// ════════════════════════════════════════════════════
+function addHabit() {
+  const name = document.getElementById('habit-name-input').value.trim();
+  if (!name) return;
+  const habits = S.habits();
+  habits.push({ id: Date.now(), name, freq: document.getElementById('habit-freq-input').value, done_dates: [], created: TODAY() });
+  save('habits', habits);
+  document.getElementById('habit-name-input').value = '';
+  renderHabits();
+  updateHomeStats();
+}
+
+function toggleHabit(id) {
+  const habits = S.habits();
+  const today = TODAY();
+  const h = habits.find(h => h.id === id);
+  if (!h) return;
+  const i = h.done_dates.indexOf(today);
+  i >= 0 ? h.done_dates.splice(i, 1) : h.done_dates.push(today);
+  save('habits', habits);
+  renderHabits();
+  updateHomeStats();
+}
+
+function deleteHabit(id) {
+  save('habits', S.habits().filter(h => h.id !== id));
+  renderHabits();
+  updateHomeStats();
+}
+
+function getStreak(h) {
+  let streak = 0, d = new Date();
+  while (true) {
+    const ds = d.toISOString().slice(0, 10);
+    if (h.done_dates.includes(ds)) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+function renderHabits() {
+  const habits = S.habits();
+  const today  = TODAY();
+  const list   = document.getElementById('habits-list');
+  const empty  = document.getElementById('habits-empty');
+
+  if (!habits.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  const last7 = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d.toISOString().slice(0, 10);
+  });
+
+  list.innerHTML = habits.map(h => {
+    const done   = h.done_dates.includes(today);
+    const streak = getStreak(h);
+    const dots   = last7.map(d => `<div class="habit-dot ${h.done_dates.includes(d) ? 'done' : ''}"></div>`).join('');
+    return `
+      <div class="habit-item">
+        <div class="habit-check ${done ? 'done' : ''}" onclick="toggleHabit(${h.id})"></div>
+        <div class="habit-info">
+          <div class="habit-name ${done ? 'done' : ''}">${h.name}</div>
+          <div class="habit-streak">${streak > 0 ? `<span class="fire">🔥</span> ${streak} day streak` : 'Start your streak today'}</div>
+          <div class="habit-dots">${dots}</div>
+        </div>
+        <button class="habit-delete" onclick="deleteHabit(${h.id})" aria-label="Delete">×</button>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// GOALS
+// ════════════════════════════════════════════════════
+let _editingGoalId = null;
+
+function openGoalModal(id) {
+  _editingGoalId = id || null;
+  document.getElementById('goal-modal-title').textContent = id ? 'Edit Goal' : 'New Goal';
+  if (id) {
+    const g = S.goals().find(g => g.id === id);
+    document.getElementById('goal-title-input').value = g.title || '';
+    document.getElementById('goal-specific').value    = g.specific || '';
+    document.getElementById('goal-measurable').value  = g.measurable || '';
+    document.getElementById('goal-achievable').value  = g.achievable || '';
+    document.getElementById('goal-relevant').value    = g.relevant || '';
+    document.getElementById('goal-date').value        = g.target_date || '';
+    document.getElementById('goal-progress').value    = g.progress || 0;
+    document.getElementById('goal-prog-val').textContent = (g.progress || 0) + '%';
+    document.getElementById('goal-status').value      = g.status || 'active';
+  } else {
+    ['goal-title-input','goal-specific','goal-measurable','goal-achievable','goal-relevant','goal-date'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('goal-progress').value = 0;
+    document.getElementById('goal-prog-val').textContent = '0%';
+    document.getElementById('goal-status').value = 'active';
+  }
+  document.getElementById('goal-modal').classList.add('open');
+}
+
+function closeGoalModal() { document.getElementById('goal-modal').classList.remove('open'); }
+
+function saveGoal() {
+  const title = document.getElementById('goal-title-input').value.trim();
+  if (!title) { document.getElementById('goal-title-input').focus(); return; }
+  const data = {
+    title,
+    specific:    document.getElementById('goal-specific').value,
+    measurable:  document.getElementById('goal-measurable').value,
+    achievable:  document.getElementById('goal-achievable').value,
+    relevant:    document.getElementById('goal-relevant').value,
+    target_date: document.getElementById('goal-date').value,
+    progress:    parseInt(document.getElementById('goal-progress').value),
+    status:      document.getElementById('goal-status').value,
+  };
+  const goals = S.goals();
+  if (_editingGoalId) {
+    Object.assign(goals.find(g => g.id === _editingGoalId), data);
+  } else {
+    goals.push({ id: Date.now(), ...data, created: TODAY() });
+  }
+  save('goals', goals);
+  closeGoalModal();
+  renderGoals();
+  updateHomeStats();
+}
+
+function deleteGoal(id) {
+  save('goals', S.goals().filter(g => g.id !== id));
+  renderGoals();
+  updateHomeStats();
+}
+
+function renderGoals() {
+  const goals = S.goals();
+  const list  = document.getElementById('goals-list');
+  const empty = document.getElementById('goals-empty');
+  if (!goals.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  list.innerHTML = goals.map(g => {
+    const bc = g.status === 'complete' ? 'badge-complete' : g.status === 'hold' ? 'badge-hold' : 'badge-active';
+    const bl = g.status === 'complete' ? 'Complete' : g.status === 'hold' ? 'On Hold' : 'Active';
+    const cc = g.status === 'complete' ? 'complete' : g.status === 'hold' ? 'on-hold' : '';
+    const meta = [];
+    if (g.specific) meta.push(`<b>S:</b> ${g.specific}`);
+    if (g.relevant)  meta.push(`<b>Why:</b> ${g.relevant}`);
+    const dateStr = g.target_date
+      ? `📅 By ${new Date(g.target_date + 'T00:00:00').toLocaleDateString('en-AU', { month: 'short', day: 'numeric', year: 'numeric' })}`
+      : '';
+    return `
+      <div class="goal-card ${cc}">
+        <div class="goal-header">
+          <div class="goal-title">${g.title}</div>
+          <span class="goal-badge ${bc}">${bl}</span>
+        </div>
+        ${meta.length ? `<div class="goal-meta">${meta.join(' · ')}</div>` : ''}
+        ${dateStr ? `<div class="goal-meta">${dateStr}</div>` : ''}
+        <div class="progress-bar"><div class="progress-fill" style="width:${g.progress || 0}%"></div></div>
+        <div style="font-size:0.71rem;color:var(--muted);margin-bottom:10px;">${g.progress || 0}% complete</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="openGoalModal(${g.id})">Edit</button>
+          <button class="btn btn-sm" style="background:var(--bg);color:var(--muted);" onclick="deleteGoal(${g.id})">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// VALUES
+// ════════════════════════════════════════════════════
+const ALL_VALUES = [
+  { en:'Respect',        fil:'Galang'             }, { en:'Compassion',     fil:'Malasakit'          },
+  { en:'Family',         fil:'Pamilya'            }, { en:'Community',      fil:'Kapwa'              },
+  { en:'Growth',         fil:'Paglago'            }, { en:'Honesty',        fil:'Katapatan'          },
+  { en:'Courage',        fil:'Tapang'             }, { en:'Balance',        fil:'Balanse'            },
+  { en:'Creativity',     fil:'Pagkamalikhain'     }, { en:'Peace',          fil:'Kapayapaan'         },
+  { en:'Joy',            fil:'Kagalakan'          }, { en:'Love',           fil:'Pagmamahal'         },
+  { en:'Wisdom',         fil:'Karunungan'         }, { en:'Justice',        fil:'Katarungan'         },
+  { en:'Health',         fil:'Kalusugan'          }, { en:'Spirituality',   fil:'Espiritwalidad'     },
+  { en:'Learning',       fil:'Pag-aaral'          }, { en:'Freedom',        fil:'Kalayaan'           },
+  { en:'Gratitude',      fil:'Pasasalamat'        }, { en:'Perseverance',   fil:'Tiyaga'             },
+  { en:'Kindness',       fil:'Kabutihan'          }, { en:'Authenticity',   fil:'Pagiging Tunay'     },
+  { en:'Patience',       fil:'Pasensiya'          }, { en:'Humility',       fil:'Kababaang-loob'     },
+  { en:'Loyalty',        fil:'Katapatan'          }, { en:'Adventure',      fil:'Pakikipagsapalaran' },
+  { en:'Security',       fil:'Kaligtasan'         }, { en:'Forgiveness',    fil:'Kapatawaran'        },
+  { en:'Mindfulness',    fil:'Pagiging Mulat'     }, { en:'Connection',     fil:'Pagkakaisa'         },
+];
+
+function initValues() {
+  const selected = S.values();
+  document.getElementById('values-grid').innerHTML = ALL_VALUES.map(v => `
+    <div class="value-chip ${selected.includes(v.en) ? 'selected' : ''}" onclick="toggleValue('${v.en}', this)">
+      <div class="value-en">${v.en}</div>
+      <div class="value-fil">${v.fil}</div>
+    </div>`).join('');
+  refreshValuesUI();
+}
+
+function toggleValue(name, el) {
+  const vals = S.values();
+  const i = vals.indexOf(name);
+  if (i >= 0) { vals.splice(i, 1); el.classList.remove('selected'); }
+  else { if (vals.length >= 10) return; vals.push(name); el.classList.add('selected'); }
+  save('values', vals);
+  refreshValuesUI();
+  updateHomeStats();
+}
+
+function refreshValuesUI() {
+  const vals = S.values();
+  document.getElementById('values-count').textContent = vals.length;
+  const rc = document.getElementById('values-reflect-card');
+  if (vals.length >= 3) {
+    rc.style.display = 'block';
+    document.getElementById('values-reflect-select').innerHTML = vals.map(v => `<option>${v}</option>`).join('');
+  } else { rc.style.display = 'none'; }
+}
+
+function saveValues() {
+  flashMsg('values-saved');
+  updateHomeStats();
+}
+
+function saveValuesReflection() {
+  const v    = document.getElementById('values-reflect-select').value;
+  const text = document.getElementById('values-reflect-text').value.trim();
+  if (!text) return;
+  const arr  = JSON.parse(localStorage.getItem('kw_val_reflections') || '[]');
+  arr.unshift({ value: v, text, date: new Date().toLocaleString('en-AU') });
+  localStorage.setItem('kw_val_reflections', JSON.stringify(arr.slice(0, 30)));
+  document.getElementById('values-reflect-text').value = '';
+  flashMsg('vr-saved');
+}
+
+// ════════════════════════════════════════════════════
+// EMOTIONS — CHECK-IN
+// ════════════════════════════════════════════════════
+let _selectedEmotion = null;
+
+function initEmotions() {
+  document.querySelectorAll('.emotion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      _selectedEmotion = btn.dataset.emotion;
+      const subs = (btn.dataset.subs || '').split(',').filter(Boolean);
+      const wrap = document.getElementById('sub-emotions-wrap');
+      const grid = document.getElementById('sub-emotions-grid');
+      if (subs.length) {
+        grid.innerHTML = subs.map(s =>
+          `<button class="sub-chip" onclick="this.classList.toggle('sel')">${s}</button>`).join('');
+        wrap.style.display = 'block';
+      } else { wrap.style.display = 'none'; }
+    });
+  });
+
+  document.querySelectorAll('.tool-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  renderEmotionLog();
+}
+
+function logEmotion() {
+  if (!_selectedEmotion) { alert('Please select an emotion first.'); return; }
+  const subs = Array.from(document.querySelectorAll('.sub-chip.sel')).map(c => c.textContent);
+  const entry = {
+    emotion:   _selectedEmotion,
+    sub:       subs.join(', '),
+    intensity: document.getElementById('emotion-intensity').value,
+    prompt:    document.getElementById('emotion-prompt').value.trim(),
+    date:      new Date().toLocaleString('en-AU'),
+  };
+  const arr = S.emotions();
+  arr.unshift(entry);
+  save('emotions', arr.slice(0, 60));
+  document.getElementById('emotion-prompt').value = '';
+  document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('sub-emotions-wrap').style.display = 'none';
+  _selectedEmotion = null;
+  renderEmotionLog();
+}
+
+function renderEmotionLog() {
+  const recent = S.emotions().slice(0, 3);
+  const el = document.getElementById('emotion-log');
+  if (!recent.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="card-title" style="margin:10px 0 8px;">Recent Check-ins</div>' +
+    recent.map(e => `
+      <div style="padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:0.81rem;">
+        <div style="font-weight:700;">${e.emotion}${e.sub ? ' · <span style="font-weight:400;color:var(--text-mid);">'+e.sub+'</span>' : ''} <span style="font-weight:400;color:var(--muted);">· ${e.intensity}/10</span></div>
+        ${e.prompt ? `<div style="color:var(--text-mid);margin-top:3px;">${e.prompt}</div>` : ''}
+        <div style="color:var(--muted);font-size:0.7rem;margin-top:3px;">${e.date}</div>
+      </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════
+// URGE SURFING
+// ════════════════════════════════════════════════════
+let _urgeInterval = null;
+let _urgeSecs     = 0;
+
+function startUrgeSurf() {
+  const desc = document.getElementById('urge-describe').value.trim();
+  if (!desc) { document.getElementById('urge-describe').focus(); return; }
+
+  _urgeSecs = 0;
+  document.getElementById('urge-start-btn').style.display = 'none';
+  document.getElementById('urge-stop-btn').style.display  = 'inline-flex';
+  document.getElementById('urge-reflection').style.display = 'none';
+
+  const canvas = document.getElementById('wave-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  _urgeInterval = setInterval(() => {
+    _urgeSecs++;
+    const m = Math.floor(_urgeSecs / 60);
+    const s = _urgeSecs % 60;
+    document.getElementById('urge-timer-disp').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+
+    let phase, sub;
+    if (_urgeSecs < 20)  { phase = 'Building…';        sub = 'Notice it — don\'t fight it'; }
+    else if (_urgeSecs < 60)  { phase = 'Climbing…';         sub = 'Ride it like a wave'; }
+    else if (_urgeSecs < 100) { phase = 'Near the peak';     sub = 'You\'re almost through'; }
+    else if (_urgeSecs < 150) { phase = 'Cresting…';         sub = 'It\'s starting to ease'; }
+    else                       { phase = 'Subsiding';         sub = 'You\'re doing it 🌊'; }
+
+    document.getElementById('urge-phase-lbl').textContent = phase;
+    document.getElementById('urge-sub-lbl').textContent   = sub;
+
+    drawWave(ctx, canvas, _urgeSecs);
+  }, 1000);
+}
+
+function drawWave(ctx, canvas, t) {
+  canvas.width  = canvas.parentElement.clientWidth  || 300;
+  canvas.height = canvas.parentElement.clientHeight || 130;
+  const w = canvas.width, h = canvas.height;
+  const peak = 90;
+  const intensity = t < peak ? t / peak : Math.max(0.08, 1 - (t - peak) / 130);
+  const baseY = h * (1 - 0.18 - intensity * 0.52);
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  for (let x = 0; x <= w; x++) {
+    const y = baseY
+      + Math.sin(x * 0.022 + t * 0.06) * 9 * intensity
+      + Math.sin(x * 0.045 - t * 0.04) * 5 * intensity;
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.lineTo(w, h);
+  ctx.lineTo(0, h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(30,95,78,0.58)');
+  grad.addColorStop(1, 'rgba(30,95,78,0.12)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+function stopUrgeSurf() {
+  clearInterval(_urgeInterval);
+  document.getElementById('urge-start-btn').style.display = 'inline-flex';
+  document.getElementById('urge-stop-btn').style.display  = 'none';
+  document.getElementById('urge-reflection').style.display = 'block';
+  document.getElementById('urge-phase-lbl').textContent = 'Session complete';
+  const m = Math.floor(_urgeSecs / 60), s = _urgeSecs % 60;
+  document.getElementById('urge-sub-lbl').textContent = `${m}m ${s}s — well done`;
+}
+
+function saveUrgeReflection() {
+  const text  = document.getElementById('urge-after-text').value.trim();
+  const urge  = document.getElementById('urge-describe').value.trim();
+  if (!text) return;
+  const arr = JSON.parse(localStorage.getItem('kw_urge_log') || '[]');
+  arr.unshift({ urge, reflection: text, duration: _urgeSecs, date: new Date().toLocaleString('en-AU') });
+  localStorage.setItem('kw_urge_log', JSON.stringify(arr.slice(0, 30)));
+  document.getElementById('urge-after-text').value = '';
+  flashMsg('urge-saved');
+}
+
+// ════════════════════════════════════════════════════
+// GROUNDING
+// ════════════════════════════════════════════════════
+function completeGrounding() {
+  document.getElementById('grounding-done').style.display = 'block';
+  ['ground-5','ground-4','ground-3','ground-2','ground-1'].forEach(id => document.getElementById(id).value = '');
+  setTimeout(() => document.getElementById('grounding-done').style.display = 'none', 5000);
+}
+
+// ════════════════════════════════════════════════════
+// OPPOSITE ACTION
+// ════════════════════════════════════════════════════
+function saveOppositeAction() {
+  const action = document.getElementById('oa-action').value.trim();
+  if (!action) return;
+  const arr = JSON.parse(localStorage.getItem('kw_oa') || '[]');
+  arr.unshift({
+    feeling: document.getElementById('oa-feeling').value.trim(),
+    urge:    document.getElementById('oa-urge').value.trim(),
+    action,
+    date:    new Date().toLocaleString('en-AU'),
+  });
+  localStorage.setItem('kw_oa', JSON.stringify(arr.slice(0, 30)));
+  document.getElementById('oa-saved').style.display = 'block';
+  setTimeout(() => document.getElementById('oa-saved').style.display = 'none', 4000);
+}
+
+// ════════════════════════════════════════════════════
+// BREATHING
+// ════════════════════════════════════════════════════
+const BREATH_PATTERNS = {
+  box: {
+    name: 'Box Breathing',
+    desc: 'Equal inhale, hold, exhale, hold. Used by athletes and special forces to build calm focus.',
+    phases: [
+      { label: 'Inhale',   dur: 4, cls: 'bc-inhale'   },
+      { label: 'Hold',     dur: 4, cls: 'bc-hold-in'  },
+      { label: 'Exhale',   dur: 4, cls: 'bc-exhale'   },
+      { label: 'Hold',     dur: 4, cls: 'bc-hold-out' },
+    ],
+    cycles: 6,
+  },
+  '478': {
+    name: '4-7-8 Calm',
+    desc: 'Extended hold and exhale rapidly activate the parasympathetic nervous system. Powerful for anxiety.',
+    phases: [
+      { label: 'Inhale', dur: 4, cls: 'bc-inhale'  },
+      { label: 'Hold',   dur: 7, cls: 'bc-hold-in' },
+      { label: 'Exhale', dur: 8, cls: 'bc-exhale'  },
+    ],
+    cycles: 4,
+  },
+  physio: {
+    name: 'Physiological Sigh',
+    desc: 'Double inhale through the nose + long exhale. The most effective single breath for rapid stress relief.',
+    phases: [
+      { label: 'Inhale (nose)',    dur: 2, cls: 'bc-inhale'  },
+      { label: 'Top-up inhale!',   dur: 2, cls: 'bc-inhale'  },
+      { label: 'Long exhale…',     dur: 7, cls: 'bc-exhale'  },
+    ],
+    cycles: 5,
+  },
+  extended: {
+    name: 'Extended Exhale',
+    desc: 'Exhaling twice as long as you inhale activates the vagus nerve and slows the heart. Great for pain.',
+    phases: [
+      { label: 'Inhale',        dur: 4, cls: 'bc-inhale' },
+      { label: 'Exhale slowly', dur: 8, cls: 'bc-exhale' },
+    ],
+    cycles: 6,
+  },
+};
+
+let _breathPatternId = 'box';
+let _breathRunning   = false;
+let _breathPhase     = 0;
+let _breathCycle     = 0;
+let _breathTimeout   = null;
+
+function selectBreath(id) {
+  if (_breathRunning) stopBreathing();
+  _breathPatternId = id;
+  document.querySelectorAll('.breath-option').forEach(o => o.classList.remove('active'));
+  document.querySelector(`[data-id="${id}"]`).classList.add('active');
+  const p = BREATH_PATTERNS[id];
+  document.getElementById('breath-title').textContent = p.name;
+  document.getElementById('breath-desc').textContent  = p.desc;
+  resetBreathCircle();
+}
+
+function resetBreathCircle() {
+  const c = document.getElementById('breath-circle');
+  c.className = 'breath-circle';
+  c.textContent = 'Press Start';
+  document.getElementById('breath-phase-lbl').textContent  = '';
+  document.getElementById('breath-cycle-lbl').textContent  = '';
+  document.getElementById('breath-done-card').style.display = 'none';
+}
+
+function startBreathing() {
+  _breathPhase = 0; _breathCycle = 0; _breathRunning = true;
+  document.getElementById('breath-start-btn').style.display = 'none';
+  document.getElementById('breath-stop-btn').style.display  = 'inline-flex';
+  document.getElementById('breath-done-card').style.display = 'none';
+  runBreathPhase();
+}
+
+function runBreathPhase() {
+  if (!_breathRunning) return;
+  const pattern = BREATH_PATTERNS[_breathPatternId];
+  const phase   = pattern.phases[_breathPhase];
+  const circle  = document.getElementById('breath-circle');
+
+  // Force animation restart
+  circle.className = 'breath-circle';
+  void circle.offsetWidth;
+  circle.style.animationDuration = phase.dur + 's';
+  circle.className = 'breath-circle ' + phase.cls;
+  circle.textContent = phase.label;
+
+  document.getElementById('breath-phase-lbl').textContent  = phase.label;
+  document.getElementById('breath-cycle-lbl').textContent  = `Cycle ${_breathCycle + 1} of ${pattern.cycles}`;
+
+  _breathTimeout = setTimeout(() => {
+    _breathPhase++;
+    if (_breathPhase >= pattern.phases.length) {
+      _breathPhase = 0;
+      _breathCycle++;
+      if (_breathCycle >= pattern.cycles) { finishBreathing(); return; }
+    }
+    runBreathPhase();
+  }, phase.dur * 1000);
+}
+
+function stopBreathing() {
+  _breathRunning = false;
+  clearTimeout(_breathTimeout);
+  document.getElementById('breath-start-btn').style.display = 'inline-flex';
+  document.getElementById('breath-stop-btn').style.display  = 'none';
+  resetBreathCircle();
+}
+
+function finishBreathing() {
+  _breathRunning = false;
+  clearTimeout(_breathTimeout);
+  document.getElementById('breath-start-btn').style.display = 'inline-flex';
+  document.getElementById('breath-stop-btn').style.display  = 'none';
+  const circle = document.getElementById('breath-circle');
+  circle.className = 'breath-circle'; circle.textContent = '🌿';
+  document.getElementById('breath-phase-lbl').textContent  = 'Complete';
+  const p = BREATH_PATTERNS[_breathPatternId];
+  document.getElementById('breath-cycle-lbl').textContent  = `${p.cycles} cycles done`;
+  const card = document.getElementById('breath-done-card');
+  card.style.display = 'block';
+  document.getElementById('breath-done-msg').textContent = `${p.cycles} cycles of ${p.name}. Your nervous system thanks you.`;
+}
+
+// ════════════════════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════════════════════
+function flashMsg(id, delay = 2400) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', delay);
+}
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initHome();
+  renderHabits();
+  renderGoals();
+  initValues();
+  initEmotions();
+  selectBreath('box');
+});
+</script>
+</body>
+</html>
